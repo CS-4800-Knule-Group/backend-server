@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knule</title>
+    <style>
+        * {
+            font-size: 18px;
+        }
+
+        input {
+            margin: 6px 6px;
+        }
+
+        .submitButton {
+            width: 80px;
+            height: 30px;
+            margin-left: 100px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 40px;
+        }
+        table, th, td, tr {
+            border: 1px solid black;
+        }
+        th, td, tr {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+
+        #displayDataButton {
+            width: 200px;
+            height: 80px;
+            font-size: 28px;
+            margin-top: 40px;
+            margin-left: 40px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <form action="/newUser" method="post">
+        <label for="fname">First Name:</label>
+        <input type="text" id="fname" name="fname">
+        <label for="lname">Last Name:</label>
+        <input type="text" id="lname" name="lname">
+        <br>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username">
+        <br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email">
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password">
+        <br>
+        <input class="submitButton" type="submit">
+    </form>
+
+    <button id="displayDataButton">Display Data</button>
+
+    <table id="userTable">
+        <thead>
+            <tr id="tableHeaders"></tr>
+        </thead>
+        <tbody id="userTableBody">
+            <!-- User rows will be inserted here -->
+        </tbody>
+    </table>
+
+    <script>
+        document.getElementById('displayDataButton').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/users')
+                if (!response.ok) {
+                    throw new Erorr('Could not reach /users')
+                }
+                const users = await response.json()
+                const tableBody = document.getElementById('userTableBody')
+                tableBody.innerHTML = '';   // clear previous rows
+                const tableHeaders = document.getElementById('tableHeaders')
+                tableHeaders.innerHTML = '';
+
+                const nameHeader = document.createElement('th')
+                nameHeader.innerText = 'Name'
+                const usernameHeader = document.createElement('th')
+                usernameHeader.innerText = 'Username'
+                const emailHeader = document.createElement('th')
+                emailHeader.innerText = 'Email'
+                const passHeader = document.createElement('th')
+                passHeader.innerText = 'Password'
+                tableHeaders.appendChild(nameHeader)
+                tableHeaders.appendChild(usernameHeader)
+                tableHeaders.appendChild(emailHeader)
+                tableHeaders.appendChild(passHeader)
+
+                users.forEach( user => {
+                    const row = document.createElement('tr');
+                    
+                    const nameCell = document.createElement('td');
+                    nameCell.textContent = user.fullName
+                    row.appendChild(nameCell);
+
+                    const usernameCell = document.createElement('td');
+                    usernameCell.textContent = user.username
+                    row.appendChild(usernameCell);
+
+                    const emailCell = document.createElement('td')
+                    emailCell.textContent = user.email
+                    row.appendChild(emailCell);
+
+                    const passwordCell = document.createElement('td');
+                    passwordCell.textContent = user.password
+                    row.appendChild(passwordCell);
+
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching users', error);
+            }
+        })
+    </script>
+</body>
+</html>

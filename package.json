@@ -1,0 +1,22 @@
+{
+  "name": "dynamodb",
+  "version": "1.0.0",
+  "nodemonConfig": {
+    "ext": "js,html,css"
+  },
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node app.js"
+  },
+  "author": "Jimmy",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.645.0",
+    "@aws-sdk/credential-providers": "^3.645.0",
+    "@aws-sdk/lib-dynamodb": "^3.645.0",
+    "@aws-sdk/util-dynamodb": "^3.645.0",
+    "express": "^4.19.2"
+  }
+}
