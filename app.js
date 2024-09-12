@@ -1,14 +1,21 @@
 const express = require('express');
 const path = require('path');
+const cors = require('cors')
 const { addItem, readTable } = require('./database.js')
 const app = express();
 const port = 3000;
 
-app.use(express.urlencoded({ extended: true }));
+app.use(
+    express.urlencoded({ extended: true }),
+    cors({
+        origin: 'https://main.d1ju3g0cqu0frk.amplifyapp.com/',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    })
+);
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
-  });
+});
 
 app.get('/users', async (req, res) => {
     const result = await readTable()
