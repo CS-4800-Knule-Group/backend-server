@@ -5,16 +5,7 @@ const { addItem, readTable } = require('./database.js')
 const app = express();
 const port = 3000;
 
-app.options('*',
-    cors({
-        origin: [
-            'https://main.d1ju3g0cqu0frk.amplifyapp.com',
-            'http://localhost:5173',
-        ],
-        methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        credentials: true,
-    })
-);
+app.use(cors());
 
 app.use(express.urlencoded({ extended: true }));
 
