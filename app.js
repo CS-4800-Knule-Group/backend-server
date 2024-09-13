@@ -8,7 +8,10 @@ const port = 3000;
 app.use(
     express.urlencoded({ extended: true }),
     cors({
-        origin: 'https://main.d1ju3g0cqu0frk.amplifyapp.com/',
+        origin: [
+            'https://main.d1ju3g0cqu0frk.amplifyapp.com/',
+            'http://localhost:5173',
+        ],
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
     })
 );
