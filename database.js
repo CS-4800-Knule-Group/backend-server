@@ -1,6 +1,5 @@
 const { CreateTableCommand, DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { PutCommand, DynamoDBDocumentClient, ScanCommand } = require('@aws-sdk/lib-dynamodb');
-const { marshall } = require("@aws-sdk/util-dynamodb");
 
 const client = new DynamoDBClient({
     region: "us-west-1",
