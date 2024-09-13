@@ -5,16 +5,18 @@ const { addItem, readTable } = require('./database.js')
 const app = express();
 const port = 3000;
 
-app.use(
-    express.urlencoded({ extended: true }),
+app.options('*',
     cors({
         origin: [
-            'https://main.d1ju3g0cqu0frk.amplifyapp.com/',
+            'https://main.d1ju3g0cqu0frk.amplifyapp.com',
             'http://localhost:5173',
         ],
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        credentials: true,
     })
 );
+
+app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
