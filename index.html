@@ -36,7 +36,7 @@
             background-color: #f2f2f2;
         }
 
-        #displayDataButton {
+        button {
             width: 200px;
             height: 80px;
             font-size: 28px;
@@ -47,7 +47,7 @@
     </style>
 </head>
 <body>
-    <form action="/newUser" method="post">
+    <form action="/users/newUser" method="post">
         <label for="fname">First Name:</label>
         <input type="text" id="fname" name="fname">
         <label for="lname">Last Name:</label>
@@ -65,14 +65,25 @@
         <input class="submitButton" type="submit">
     </form>
 
-    <button id="displayDataButton">Display Data</button>
+    <button id="displayDataButton">Display Users</button>
+
+    <button id="displayPostsButton">Display Posts</button>
 
     <table id="userTable">
         <thead>
-            <tr id="tableHeaders"></tr>
+            <tr id="userHeaders"></tr>
         </thead>
         <tbody id="userTableBody">
             <!-- User rows will be inserted here -->
+        </tbody>
+    </table>
+
+    <table id="postsTable">
+        <thead>
+            <tr id="postHeaders"></tr>
+        </thead>
+        <tbody id="postsTableBody">
+            <!-- Post rows will be inserted here -->
         </tbody>
     </table>
 
@@ -86,7 +97,7 @@
                 const users = await response.json()
                 const tableBody = document.getElementById('userTableBody')
                 tableBody.innerHTML = '';   // clear previous rows
-                const tableHeaders = document.getElementById('tableHeaders')
+                const tableHeaders = document.getElementById('userHeaders')
                 tableHeaders.innerHTML = '';
 
                 const nameHeader = document.createElement('th')
@@ -125,6 +136,50 @@
                 });
             } catch (error) {
                 console.error('Error fetching users', error);
+            }
+        })
+
+        document.getElementById('displayPostsButton').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/posts')
+                if (!response.ok) {
+                    throw new Erorr('Could not reach /posts')
+                }
+                const posts = await response.json()
+                const tableBody = document.getElementById('postsTableBody')
+                tableBody.innerHTML = '';   // clear previous rows
+                const tableHeaders = document.getElementById('postHeaders')
+                tableHeaders.innerHTML = '';
+
+                const authorHeader = document.createElement('th')
+                authorHeader.innerText = 'AuthorId'
+                const contentHeader = document.createElement('th')
+                contentHeader.innerText = 'Content'
+                const timestampHeader = document.createElement('th')
+                timestampHeader.innerText = 'Timestamp'
+                tableHeaders.appendChild(authorHeader)
+                tableHeaders.appendChild(contentHeader)
+                tableHeaders.appendChild(timestampHeader)
+
+                posts.forEach( post => {
+                    const row = document.createElement('tr');
+                    
+                    const authorId = document.createElement('td');
+                    authorId.textContent = post.userId
+                    row.appendChild(authorId);
+
+                    const contentCell = document.createElement('td');
+                    contentCell.textContent = post.content
+                    row.appendChild(contentCell);
+
+                    const timestampCell = document.createElement('td')
+                    timestampCell.textContent = post.timestamp
+                    row.appendChild(timestampCell);
+
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching posts', error);
             }
         })
     </script>
