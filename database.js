@@ -6,7 +6,7 @@ const client = new DynamoDBClient({
 });
 const docClient = DynamoDBDocumentClient.from(client);
 
-const readTable = async() => {
+const readUsers = async() => {
     const command = new ScanCommand({
         TableName: "Users",
     });
@@ -16,7 +16,7 @@ const readTable = async() => {
     return response.Items;
 }
 
-const addItem = async(newUser) => {
+const addUser = async(newUser) => {
     const command = new PutCommand({
         TableName: "Users",
         Item: newUser,
@@ -26,4 +26,30 @@ const addItem = async(newUser) => {
     return response;
 }
 
-module.exports = { addItem, readTable };
+const readPosts = async() => {
+    const command = new ScanCommand({
+        TableName: "Posts",
+    });
+
+    const response = await docClient.send(command);
+    return response.Items;
+}
+
+// const readPostsBy = async(userId) => {
+//     const command = new ScanCommand({
+//         TableName: "Posts",
+
+//     })
+// }
+
+const createPost = async(newPost) => {
+    const command = new PutCommand({
+        TableName: "Posts",
+        Item: newPost,
+    });
+
+    const response = await docClient.send(command)
+    return response;
+}
+
+module.exports = { addUser, readUsers, createPost, readPosts };
