@@ -6,6 +6,14 @@ const { createPost, readPosts } = require('../database.js');
 const uid = new ShortUniqueId({ length: 10 });
 
 router.get('/', async (req, res) => {
+    for (let i = 0; i < 10; i++) {
+        console.log(uid.rnd())
+    }
+
+    for (let i = 0; i < 10; i++) {
+        console.log(new Date().toISOString())
+    }
+
     const result = await readPosts();
     res.json(result);
 })
@@ -30,7 +38,12 @@ router.post('/:userId', async (req, res) => {
     res.redirect('/')
 })
 
-router.get('/:postId', (req, res) => {
+router.get('/:userId', (req, res) => {
+
+})
+
+// could be potential route for creating comments
+router.post('/:postId/comments', (req, res) => {
 
 })
 

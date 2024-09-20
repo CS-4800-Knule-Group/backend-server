@@ -23,7 +23,6 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 40px;
         }
         table, th, td, tr {
             border: 1px solid black;
@@ -34,6 +33,15 @@
         }
         th {
             background-color: #f2f2f2;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .container {
+            margin-top: 40px;
         }
 
         button {
@@ -69,23 +77,49 @@
 
     <button id="displayPostsButton">Display Posts</button>
 
-    <table id="userTable">
-        <thead>
-            <tr id="userHeaders"></tr>
-        </thead>
-        <tbody id="userTableBody">
-            <!-- User rows will be inserted here -->
-        </tbody>
-    </table>
+    <button id="displayCommentsButton">Display Comments</button>
 
-    <table id="postsTable">
-        <thead>
-            <tr id="postHeaders"></tr>
-        </thead>
-        <tbody id="postsTableBody">
-            <!-- Post rows will be inserted here -->
-        </tbody>
-    </table>
+    <button id="displayLikesButton">Display Likes</button>
+
+    <div id="usersContainer" class="container">
+        <table id="userTable">
+            <thead>
+                <tr id="userHeaders"></tr>
+            </thead>
+            <tbody id="userTableBody">
+                <!-- User rows will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="postsContainer" class="container">
+        <table id="postsTable">
+            <thead>
+                <tr id="postHeaders"></tr>
+            </thead>
+            <tbody id="postsTableBody">
+                <!-- Post rows will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="commentsContainer" class="container">
+        <table id="commentsTable">
+            <thead>
+                <tr id="commentHeaders"></tr>
+            </thead>
+            <tbody id="commentsTableBody"></tbody>
+        </table>
+    </div>
+
+    <div id="likesContainer" class="container">
+        <table id="likesTable">
+            <thead>
+                <tr id="likeHeaders"></tr>
+            </thead>
+            <tbody id="likesTableBody"></tbody>
+        </table>
+    </div>
 
     <script>
         document.getElementById('displayDataButton').addEventListener('click', async () => {
@@ -99,6 +133,15 @@
                 tableBody.innerHTML = '';   // clear previous rows
                 const tableHeaders = document.getElementById('userHeaders')
                 tableHeaders.innerHTML = '';
+
+                // create title for table
+                const tableContainer = document.getElementById('usersContainer')
+                if (!document.getElementById('tableTitle')) {
+                    const title = document.createElement('h2')
+                    title.class = 'tableTitle'
+                    title.innerText = 'Users Table'
+                    tableContainer.insertBefore(title, tableContainer.firstChild)
+                }
 
                 const nameHeader = document.createElement('th')
                 nameHeader.innerText = 'Name'
@@ -151,6 +194,15 @@
                 const tableHeaders = document.getElementById('postHeaders')
                 tableHeaders.innerHTML = '';
 
+                // create title for table
+                const tableContainer = document.getElementById('postsContainer')
+                if (!document.getElementById('tableTitle')) {
+                    const title = document.createElement('h2')
+                    title.class = 'tableTitle'
+                    title.innerText = 'Posts Table'
+                    tableContainer.insertBefore(title, tableContainer.firstChild)
+                }
+
                 const authorHeader = document.createElement('th')
                 authorHeader.innerText = 'AuthorId'
                 const contentHeader = document.createElement('th')
@@ -175,6 +227,155 @@
                     const timestampCell = document.createElement('td')
                     timestampCell.textContent = post.timestamp
                     row.appendChild(timestampCell);
+
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching posts', error);
+            }
+        })
+
+        document.getElementById('displayCommentsButton').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/comments')
+                if (!response.ok) {
+                    throw new Erorr('Could not reach /comments')
+                }
+                const comments = await response.json()
+                const tableBody = document.getElementById('commentsTableBody')
+                tableBody.innerHTML = '';   // clear previous rows
+                const tableHeaders = document.getElementById('commentHeaders')
+                tableHeaders.innerHTML = '';
+
+                // create title for table
+                const tableContainer = document.getElementById('commentsContainer')
+                if (!document.getElementById('tableTitle')) {
+                    const title = document.createElement('h2')
+                    title.class = 'tableTitle'
+                    title.innerText = 'Comments Table'
+                    tableContainer.insertBefore(title, tableContainer.firstChild)
+                }
+
+                const authorHeader = document.createElement('th')
+                authorHeader.innerText = 'AuthorId'
+                const contentHeader = document.createElement('th')
+                contentHeader.innerText = 'Content'
+                const commentHeader = document.createElement('th')
+                commentHeader.innerText = 'CommentId'
+                const parentCommentHeader = document.createElement('th')
+                parentCommentHeader.innerText = 'ParentComment'
+                const timestampHeader = document.createElement('th')
+                timestampHeader.innerText = 'CreatedAt'
+                const postHeader = document.createElement('th')
+                postHeader.innerText = 'PostId'
+                
+                tableHeaders.appendChild(authorHeader)
+                tableHeaders.appendChild(contentHeader)
+                tableHeaders.appendChild(commentHeader)
+                tableHeaders.appendChild(parentCommentHeader)
+                tableHeaders.appendChild(timestampHeader)
+                tableHeaders.appendChild(postHeader)
+
+                comments.forEach( comment => {
+                    const row = document.createElement('tr');
+                    
+                    const authorId = document.createElement('td');
+                    authorId.textContent = comment.userId
+                    row.appendChild(authorId);
+
+                    const contentCell = document.createElement('td');
+                    contentCell.textContent = comment.content
+                    row.appendChild(contentCell);
+
+                    const commentIdCell = document.createElement('td');
+                    commentIdCell.textContent = comment.commentId
+                    row.appendChild(commentIdCell);
+
+                    const parentCommentIdCell = document.createElement('td');
+                    parentCommentIdCell.textContent = comment.parentCommentId
+                    row.appendChild(parentCommentIdCell);
+
+                    const timestampCell = document.createElement('td')
+                    timestampCell.textContent = comment.createdAt
+                    row.appendChild(timestampCell);
+
+                    const postCell = document.createElement('td');
+                    postCell.textContent = comment.postId
+                    row.appendChild(postCell);
+
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching posts', error);
+            }
+        })
+
+        document.getElementById('displayLikesButton').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/likes')
+                if (!response.ok) {
+                    throw new Erorr('Could not reach /likes')
+                }
+                const likes = await response.json()
+                const tableBody = document.getElementById('likesTableBody')
+                tableBody.innerHTML = '';   // clear previous rows
+                const tableHeaders = document.getElementById('likeHeaders')
+                tableHeaders.innerHTML = '';
+
+                // create title for table
+                const tableContainer = document.getElementById('likesContainer')
+                if (!document.getElementById('tableTitle')) {
+                    const title = document.createElement('h2')
+                    title.class = 'tableTitle'
+                    title.innerText = 'Likes Table'
+                    tableContainer.insertBefore(title, tableContainer.firstChild)
+                }
+
+                const userHeader = document.createElement('th')
+                userHeader.innerText = 'UserId'
+                const likeHeader = document.createElement('th')
+                likeHeader.innerText = 'Like'
+                const targetHeader = document.createElement('th')
+                targetHeader.innerText = 'TargetId'
+                const targetTypeHeader = document.createElement('th')
+                targetTypeHeader.innerText = 'TargetType'
+                const targetOwnerHeader = document.createElement('th')
+                targetOwnerHeader.innerText = 'TargetOwner'
+                const timeHeader = document.createElement('th')
+                timeHeader.innerText = 'ReactedAt'
+                tableHeaders.appendChild(userHeader)
+                tableHeaders.appendChild(likeHeader)
+                tableHeaders.appendChild(targetHeader)
+                tableHeaders.appendChild(targetTypeHeader)
+                tableHeaders.appendChild(targetOwnerHeader)
+                tableHeaders.appendChild(timeHeader)
+
+                likes.forEach( like => {
+                    const row = document.createElement('tr');
+                    
+                    const userId = document.createElement('td');
+                    userId.textContent = like.userId
+                    row.appendChild(userId);
+
+                    const likeCell = document.createElement('td');
+                    likeCell.textContent = like.like
+                    row.appendChild(likeCell);
+
+                    const targetCell = document.createElement('td')
+                    targetCell.textContent = like.targetId
+                    row.appendChild(targetCell);
+
+                    const targetTypeCell = document.createElement('td');
+                    targetTypeCell.textContent = like.targetType
+                    row.appendChild(targetTypeCell);
+
+                    const targetOwnerCell = document.createElement('td');
+                    targetOwnerCell.textContent = like.targetOwnerId
+                    row.appendChild(targetOwnerCell);
+
+                    const createdAtCell = document.createElement('td');
+                    createdAtCell.textContent = like.createdAt
+                    row.appendChild(createdAtCell);
 
                     tableBody.appendChild(row);
                 });

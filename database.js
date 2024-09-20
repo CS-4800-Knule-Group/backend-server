@@ -52,4 +52,42 @@ const createPost = async(newPost) => {
     return response;
 }
 
-module.exports = { addUser, readUsers, createPost, readPosts };
+const readComments = async() => {
+    const command = new ScanCommand({
+        TableName: "Comments",
+    });
+
+    const response = await docClient.send(command);
+    return response.Items;
+}
+
+const createComment = async(newComment) => {
+    const command = new PutCommand({
+        TableName: "Comments",
+        Item: newComment,
+    })
+
+    const response = await docClient.send(command);
+    return response;
+}
+
+const readLikes = async() => {
+    const command = new ScanCommand({
+        TableName: "Likes",
+    });
+
+    const response = await docClient.send(command);
+    return response.Items;
+}
+
+const createLike = async(newLike) => {
+    const command = new PutCommand({
+        TableName: "Likes",
+        Item: newLike,
+    })
+
+    const response = await docClient.send(command);
+    return response;
+}
+
+module.exports = { addUser, readUsers, createPost, readPosts, readLikes, readComments };
