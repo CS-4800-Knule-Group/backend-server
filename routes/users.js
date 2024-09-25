@@ -36,7 +36,7 @@ router.post('/newUser', async (req, res) => {
     const result = await addUser(newUser)
     console.log('Received form data: ', { result })
 
-    res.redirect('/');
+    res.redirect('https://main.d1ju3g0cqu0frk.amplifyapp.com/');
 })
 
 module.exports = router;
