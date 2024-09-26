@@ -11,14 +11,13 @@ const hashPassword = async (password) => {
     }
 };
 
-// TODO: Modify this compare. only needs 1 parameter of plain, hashedPass should be grabbed from db
-// const comparePasswords = async (plainPassword, hashedPassword) => {
-//     try {
-//         const match = await bcrypt.compare(plainPassword, hashedPassword);
-//         return match;
-//     } catch (error) {
-//         console.error('Erorr comparing passwords: ', error);
-//     }
-// };
+const comparePasswords = async (plainPassword, hashedPassword) => {
+    try {
+        const match = await bcrypt.compare(plainPassword, hashedPassword);
+        return match;
+    } catch (error) {
+        console.error('Erorr comparing passwords: ', error);
+    }
+};
 
-module.exports = { hashPassword }
+module.exports = { hashPassword, comparePasswords }

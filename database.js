@@ -1,4 +1,4 @@
-const { CreateTableCommand, DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { CreateTableCommand, DynamoDBClient, QueryCommand } = require('@aws-sdk/client-dynamodb');
 const { PutCommand, DynamoDBDocumentClient, ScanCommand } = require('@aws-sdk/lib-dynamodb');
 
 const client = new DynamoDBClient({
@@ -90,4 +90,29 @@ const createLike = async(newLike) => {
     return response;
 }
 
-module.exports = { addUser, readUsers, createPost, readPosts, readLikes, readComments };
+const getUserPass = async(username) => {
+    try {
+        const command = new QueryCommand({
+            TableName: "Users",
+            IndexName: "username-index",
+            KeyConditionExpression: "username = :username",
+            ExpressionAttributeValues: {
+                ':username': { S: username }
+            },
+            ProjectionExpression: "password"
+        })
+    
+        const response = await client.send(command)
+
+        if (response.Items.length > 0) {
+            return response.Items[0].password.S; // Return the password from the result
+        } else {
+            return "User not found.";
+        }
+    } catch (error) {
+        console.error("Error querying user:", error);
+        throw new Error("Failed to query user password")
+    }
+}
+
+module.exports = { addUser, readUsers, createPost, readPosts, readLikes, readComments, getUserPass };
