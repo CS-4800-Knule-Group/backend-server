@@ -7,7 +7,7 @@ const { hashPassword } = require('../scripts/encrypt.js')
 const { authenticateToken } = require('../scripts/middleware.js');
 
 
-router.get('/', authenticateToken, async (req, res) => {
+router.get('/', async (req, res) => {
     const result = await readUsers();
     res.json(result)
 })
