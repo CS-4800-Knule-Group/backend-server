@@ -1,5 +1,5 @@
 const { CreateTableCommand, DynamoDBClient, QueryCommand } = require('@aws-sdk/client-dynamodb');
-const { PutCommand, DynamoDBDocumentClient, ScanCommand } = require('@aws-sdk/lib-dynamodb');
+const { PutCommand, DynamoDBDocumentClient, ScanCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb');
 
 const client = new DynamoDBClient({
     region: "us-west-1",
@@ -115,4 +115,74 @@ const getUserPass = async(username) => {
     }
 }
 
-module.exports = { addUser, readUsers, createPost, readPosts, readLikes, readComments, getUserPass };
+const getUserId = async (username) => {
+    try {
+        const command = new QueryCommand({
+            TableName: "Users",
+            IndexName: "username-index",
+            KeyConditionExpression: "username = :username",
+            ExpressionAttributeValues: {
+                ':username': { S: username }
+            },
+            ProjectionExpression: "userId"
+        })
+    
+        const response = await client.send(command)
+
+        if (response.Items.length > 0) {
+            return response.Items[0].userId.S; // Return the password from the result
+        } else {
+            return "User not found.";
+        }
+    } catch (error) {
+        console.error("Error querying user:", error);
+        throw new Error("Failed to query user password")
+    }
+}
+
+const addRtoken = async (rToken) => {
+    const command = new PutCommand({
+        TableName: "RefreshTokens",
+        Item: rToken
+    })
+
+    const response = await docClient.send(command);
+    return response;
+}
+
+const getRtoken = async (userId) => {
+    const command = new QueryCommand({
+        TableName: "RefreshTokens",
+        KeyConditionExpression: "userId = :userId",
+        ExpressionAttributeValues: {
+            ":userId": { S: userId }
+        },
+        ProjectionExpression: "rToken"
+    })
+
+    const response = await client.send(command)
+    if (response.Items.length > 0) {
+        return response.Items[0].rToken.S
+    } else {
+        throw new Error("User does not have a valid refresh token")
+    }
+}
+
+const deleteRtoken = async (userId) => {
+    try {
+        const command = new DeleteCommand({
+            TableName: "RefreshTokens",
+            Key: {
+                "userId": userId
+            }
+        })
+        const response = await client.send(command)
+    } catch (err) {
+        console.log(err)
+        throw new Error("Error deleting the record", err)
+    }
+}
+
+module.exports = { addUser, readUsers, createPost, readPosts, readLikes, 
+    readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken
+ };
