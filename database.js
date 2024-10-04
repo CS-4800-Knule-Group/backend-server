@@ -183,6 +183,21 @@ const deleteRtoken = async (userId) => {
     }
 }
 
+const getUserPosts = async (userId) => {
+    const command = new QueryCommand({
+        TableName: "Posts",
+        KeyConditionExpression: "userId = :userId",
+        ExpressionAttributeValues: {
+            ":userId": { S: userId }
+        },
+        ProjectionExpression: "postId"
+    })
+
+    const response = await client.send(command)
+    return response.Items
+}
+
 module.exports = { addUser, readUsers, createPost, readPosts, readLikes, 
-    readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken
+    readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken,
+    getUserPosts
  };
