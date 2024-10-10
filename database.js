@@ -1,5 +1,5 @@
 const { CreateTableCommand, DynamoDBClient, QueryCommand } = require('@aws-sdk/client-dynamodb');
-const { PutCommand, DynamoDBDocumentClient, ScanCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb');
+const { PutCommand, DynamoDBDocumentClient, ScanCommand, DeleteCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
 
 const client = new DynamoDBClient({
     region: "us-west-1",
@@ -197,7 +197,36 @@ const getUserPosts = async (userId) => {
     return response.Items
 }
 
+const saveMessage = async (message) => {
+    const command = new PutCommand({
+        TableName: "Messages",
+        Item: message
+    })
+
+    const response = await docClient.send(command)
+    return response
+}
+
+const getMessageHistory = async (conversationId) => {
+    const command = new QueryCommand({
+        TableName: "Messages",
+        KeyConditionExpression: "conversationId = :conversationId",
+        ExpressionAttributeValues: {
+            ":conversationId": { S: conversationId }
+        },
+        ScanIndexForward: true
+    })
+
+    const response = await client.send(command)
+    if (response.Items.length > 0) {
+        return response.Items
+    } else {
+        console.error('Error fetching message history', err);
+        return []
+    }
+}
+
 module.exports = { addUser, readUsers, createPost, readPosts, readLikes, 
     readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken,
-    getUserPosts
+    getUserPosts, saveMessage, getMessageHistory
  };

@@ -12,6 +12,7 @@ const users = require('./routes/users.js');
 const posts = require('./routes/posts.js');
 const comments = require('./routes/comments.js');
 const likes = require('./routes/reaction.js');
+const messages = require('./routes/message.js')
 
 const port = 3000;
 
@@ -25,6 +26,7 @@ app.use('/users', users);
 app.use('/posts', posts);
 app.use('/comments', comments);
 app.use('/likes', likes);
+app.use('/messages', messages);
 
 // create http server from express app
 const server = http.createServer(app)
