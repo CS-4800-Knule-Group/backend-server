@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client 1</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #chat {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            height: 200px;
+            overflow-y: scroll;
+        }
+        #messageInput {
+            width: 300px;
+            padding: 5px;
+        }
+        .message {
+            margin: 5px 0;
+        }
+        .sent {
+            color: blue;
+            text-align: right;
+        }
+        .received {
+            color: green;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Client 1</h1>
+    <div id="chat"></div>
+    <input type="text" id="messageInput" placeholder="Type your message here...">
+    <button onclick="sendMessage()">Send</button>
+</body>
+<script>
+    const userId = "217ab917-9721-4afc-bd89-104e67af597b"
+    const recipientId = "027c01e2-e6f6-4a5b-bf9b-afc397b3b3c3"
+    // create websocket connection
+    // connection once deployed:    ws://knule.duckdns.org/userId
+    const ws = new WebSocket('ws://localhost:3000/217ab917-9721-4afc-bd89-104e67af597b');
+
+    ws.onopen = () => {
+        console.log('Connected to WebSocket server');
+    }
+
+    // listen for messages
+    ws.onmessage = (event) => {
+        const { from, text } = JSON.parse(event.data);
+        const chatDiv = document.getElementById('chat');
+        chatDiv.innerHTML += `<div class="message received"><strong>${from}:</strong> ${text}</div>`;
+        chatDiv.scrollTop = chatDiv.scrollHeight; // Scroll to the bottom
+    }
+
+    ws.onclose = () => {
+        console.log('WebSocket connection closed')
+    }
+
+    const sendMessage = () => {
+        const input = document.getElementById('messageInput')
+        const messageText = input.value;
+        if (messageText.trim()) {
+            const message = {
+                recipientId: recipientId,
+                text: messageText
+            }
+            ws.send(JSON.stringify(message))
+            
+            // display the sent message in the chat
+            const chatDiv = document.getElementById('chat')
+            chatDiv.innerHTML += `<div class="message sent"><strong>You:</strong> ${messageText}</div>`
+            input.value = '';   // clear input
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+        }
+    }
+
+</script>
+</html>
