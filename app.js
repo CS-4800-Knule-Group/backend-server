@@ -1,8 +1,7 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
-const https = require('https');
-const fs = require('fs');
+const http = require('http');
 const WebSocketServer = require('./wsServer.js')
 
 const app = express();
@@ -29,14 +28,8 @@ app.use('/comments', comments);
 app.use('/likes', likes);
 app.use('/messages', messages);
 
-// load SSL certificates
-const sslOptions = {
-  key: fs.readFileSync('server.key'),
-  cert: fs.readFileSync('server.cert'),
-}
-
 // create http server from express app
-const server = https.createServer(sslOptions, app)
+const server = http.createServer(app)
 // Initialize WebSocketServer to the http server
 WebSocketServer(server);
   
