@@ -65,7 +65,7 @@ router.get('/getR', async (req, res) => {
 
 function generateAccessToken(user) {
     // change expire time to around 15-30min
-    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '30s' })
+    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '6000s' })
 }
 
 function encryptToken(token) {

@@ -2,6 +2,7 @@ const express = require('express');
 const ShortUniqueId = require('short-unique-id');
 const router = express.Router();
 const { createPost, readPosts, getUserPosts } = require('../database.js');
+const { authenticateToken } = require('../scripts/middleware.js');
 
 const uid = new ShortUniqueId({ length: 10 });
 
