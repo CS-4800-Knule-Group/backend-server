@@ -1,5 +1,5 @@
 node_modules/
 *.rest
 .env
-.cert
-.key
+*.cert
+*.key
