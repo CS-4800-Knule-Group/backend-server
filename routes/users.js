@@ -2,7 +2,7 @@
 const express = require('express');
 const router =  express.Router();
 const { v4: uuidv4 } = require('uuid');
-const { addUser, readUsers } = require('../database.js');
+const { addUser, readUsers, updateFollowing } = require('../database.js');
 const { hashPassword } = require('../scripts/encrypt.js')
 const { authenticateToken } = require('../scripts/middleware.js');
 
@@ -38,6 +38,14 @@ router.post('/newUser', async (req, res) => {
     console.log('Received form data: ', { result })
 
     res.redirect('https://main.d1ju3g0cqu0frk.amplifyapp.com/');
+})
+
+router.put('/updateFollowing', async (req, res) =>{
+    const {userId, targetId} = res.body;
+
+    const result = await updateFollowing(userId, targetId);
+    console.log('Updated following list', {result});
+
 })
 
 module.exports = router;
