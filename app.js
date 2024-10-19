@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
-const http = require('https');
+const http = require('http');
 const WebSocketServer = require('./wsServer.js')
 
 const app = express();
