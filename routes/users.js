@@ -41,11 +41,18 @@ router.post('/newUser', async (req, res) => {
 })
 
 router.put('/updateFollowing', async (req, res) =>{
-    const {userId, targetId} = res.body;
+    const {userId, targetId} = req.body;
 
     const result = await updateFollowing(userId, targetId);
     console.log('Updated following list', {result});
+    res.send(result)
 
 })
+
+router.put('/test'), async(req, res) =>{
+
+    console.log("User: " + userId + ", Target: " + targetId);
+    res.send(req.body)
+}
 
 module.exports = router;

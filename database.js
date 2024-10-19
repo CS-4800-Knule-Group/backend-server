@@ -229,48 +229,26 @@ const getMessageHistory = async (conversationId) => {
 }
 
 const updateFollowing = async (userId, targetId) =>{
+    console.log(targetId)
     const command = new QueryCommand({
         TableName: "Users",
         Key: {
-            userId: userId,
+            userId: {S: userId},
         },
-        UpdateExpression: 'SET following = list_append(if_not_exists(following, :empty_list), :new_following)',
+        UpdateExpression: "SET #following = list_append(#following, :following)",
+        ExpressionAttributeNames:{
+            '#following' : 'following'
+        },
         ExpressionAttributeValues: {
-            ':new_following': [targetId],
-            ':empty_list': [],
+            ':following' : {S: targetId}
         },
-        ConditionExpression: 'not contains(following, :targetId)',
-        ReturnValues: 'UPDATED_NEW',
     });
 
-    try {
-        // Attempt to add the targetId to the following list
-        const data = await docClient.send(command);
-        console.log('Following added:', data.Attributes);
-    } catch (err) {
-        if (err.name === 'ConditionalCheckFailedException') {
-            // If the targetId is already in the following list, remove it
-            const removeParams = {
-                TableName: 'Users',
-                Key: {
-                    userId: userId,
-                },
-                UpdateExpression: 'DELETE following :targetId',
-                ExpressionAttributeValues: {
-                    ':targetId': docClient.marshall(targetId), // Marshall to a DynamoDB type
-                },
-                ReturnValues: 'UPDATED_NEW',
-            };
-
-            try {
-                const data = await docClient.send(new UpdateCommand(removeParams));
-                console.log('Following removed:', data.Attributes);
-            } catch (removeErr) {
-                console.error('Failed to remove following:', removeErr);
-            }
-        } else {
-            console.error('Failed to add following:', err);
-        }
+    try{
+        const response = await client.send(command);
+        return("Complete!")
+    } catch(err){
+        return("Fail ", err);
     }
 }
 
