@@ -28,14 +28,9 @@ app.use('/comments', comments);
 app.use('/likes', likes);
 app.use('/messages', messages);
 
-// load SSL certificates
-const sslOptions = {
-  key: fs.readFileSync('server.key'),
-  cert: fs.readFileSync('server.cert'),
-}
 
 // create http server from express app
-const server = http.createServer(sslOptions, app)
+const server = http.createServer(app)
 // Initialize WebSocketServer to the http server
 WebSocketServer(server);
   
