@@ -229,8 +229,8 @@ const getMessageHistory = async (conversationId) => {
 }
 
 const updateFollowing = async (userId, targetId) =>{
-    console.log(targetId)
-    const command = new UpdateCommand({
+    
+    const commandAdd = new UpdateCommand({
         TableName: "Users",
         Key: {
             userId: userId,
@@ -245,10 +245,53 @@ const updateFollowing = async (userId, targetId) =>{
         ReturnValues: 'UPDATED_NEW'
     });
 
+    const commandGetList = new QueryCommand({
+        TableName: "Users",
+        KeyConditionExpression: "userId = :userId",
+        ExpressionAttributeValues:{
+            ':userId': {S: userId}
+        }
+    })
+
+    
+
     try{
-        const response = await client.send(command);
+        const getResponse = await client.send(commandGetList);
+        const item = getResponse.Items;
+
+        if(!item[0].userId){
+            console.log("There is no following list or Item")
+            return;
+        }
+
+        const followingList = item[0].following.L.map(attr => attr.S);
+        console.log(followingList);
+
+        const index = followingList.indexOf(targetId);
+        if(index !== -1){
+            followingList.splice(index, 1);
+            console.log(`Removed ${targetId} from following list.`);
+        } else{
+            followingList.push(targetId);
+            console.log(followingList);
+            console.log(`Added ${targetId} to following list.`);
+        }
+
+        const commandUpdate = new UpdateCommand({
+            TableName: "Users",
+            Key: {
+                userId: userId,
+            },
+            UpdateExpression: 'SET following = :newList',
+            ExpressionAttributeValues: {
+                ':newList' : {L: followingList.map(id => ({S: id}))},
+            }
+        })
+
+        await docClient.send(commandUpdate);
         return("Complete!")
     } catch(err){
+        if (err )
         return("Fail ", err);
     }
 }
