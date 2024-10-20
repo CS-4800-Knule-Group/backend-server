@@ -1,5 +1,5 @@
 const { CreateTableCommand, DynamoDBClient, QueryCommand } = require('@aws-sdk/client-dynamodb');
-const { PutCommand, DynamoDBDocumentClient, ScanCommand, DeleteCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
+const { PutCommand, DynamoDBDocumentClient, ScanCommand, DeleteCommand, GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 
 const client = new DynamoDBClient({
     region: "us-west-1",
@@ -230,18 +230,19 @@ const getMessageHistory = async (conversationId) => {
 
 const updateFollowing = async (userId, targetId) =>{
     console.log(targetId)
-    const command = new QueryCommand({
+    const command = new UpdateCommand({
         TableName: "Users",
         Key: {
-            userId: {S: userId},
+            userId: userId,
         },
         UpdateExpression: "SET #following = list_append(#following, :following)",
         ExpressionAttributeNames:{
             '#following' : 'following'
         },
         ExpressionAttributeValues: {
-            ':following' : {S: targetId}
+            ':following' : [targetId]
         },
+        ReturnValues: 'UPDATED_NEW'
     });
 
     try{
