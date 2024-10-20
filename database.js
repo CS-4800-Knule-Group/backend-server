@@ -229,74 +229,136 @@ const getMessageHistory = async (conversationId) => {
 }
 
 const updateFollowing = async (userId, targetId) =>{
-    
-    const commandAdd = new UpdateCommand({
-        TableName: "Users",
-        Key: {
-            userId: userId,
-        },
-        UpdateExpression: "SET #following = list_append(#following, :following)",
-        ExpressionAttributeNames:{
-            '#following' : 'following'
-        },
-        ExpressionAttributeValues: {
-            ':following' : [targetId]
-        },
-        ReturnValues: 'UPDATED_NEW'
-    });
-
-    const commandGetList = new QueryCommand({
+    const commandGet = new QueryCommand({
         TableName: "Users",
         KeyConditionExpression: "userId = :userId",
         ExpressionAttributeValues:{
-            ':userId': {S: userId}
+            ":userId": {S: userId}
         }
     })
 
-    
-
     try{
-        const getResponse = await client.send(commandGetList);
-        const item = getResponse.Items;
-
-        if(!item[0].userId){
-            console.log("There is no following list or Item")
-            return;
-        }
-
-        const followingList = item[0].following.L.map(attr => attr.S);
-        console.log(followingList);
+        const getResponse = await client.send(commandGet);
+        const items = getResponse.Items;
+        const followingList = items[0].following.L.map(attr => attr.S);
 
         const index = followingList.indexOf(targetId);
-        if(index !== -1){
-            followingList.splice(index, 1);
-            console.log(`Removed ${targetId} from following list.`);
-        } else{
-            followingList.push(targetId);
-            console.log(followingList);
-            console.log(`Added ${targetId} to following list.`);
-        }
 
-        const commandUpdate = new UpdateCommand({
+        const commandDelete = new UpdateCommand({
             TableName: "Users",
             Key: {
                 userId: userId,
             },
-            UpdateExpression: 'SET following = :newList',
-            ExpressionAttributeValues: {
-                ':newList' : {L: followingList.map(id => ({S: id}))},
-            }
-        })
+            UpdateExpression: `REMOVE #following[${index}]`,
+            ExpressionAttributeNames:{
+                '#following' : 'following'
+            },
+            ReturnValues: 'UPDATED_NEW'
+        });
 
-        await docClient.send(commandUpdate);
-        return("Complete!")
+        await docClient.send(commandDelete);
+
+        
+        console.log(`Removed ${targetId} from ${userId}'s following list`)
+        return(`Removed ${targetId} from ${userId}'s following list`)
     } catch(err){
-        if (err )
-        return("Fail ", err);
+        if(err.name === 'ValidationException'){
+            const command = new UpdateCommand({
+                TableName: "Users",
+                Key: {
+                    userId: userId,
+                },
+                UpdateExpression: "SET #following = list_append(#following, :following)",
+                ExpressionAttributeNames:{
+                    '#following' : 'following'
+                },
+                ExpressionAttributeValues: {
+                    ':following' : [targetId]
+                },
+                ReturnValues: 'UPDATED_NEW'
+            });
+
+            try{
+                const response = await docClient.send(command);
+                console.log(`Added ${targetId} to ${userId}'s following list`)
+                return(`Added ${targetId} to ${userId}'s following list`)
+            } catch(error){
+                return("Fail ", error);
+            }
+        }else{
+            return("Operation Failed.")
+        }
+    }
+}
+
+const updateFollowers = async (userId, targetId) =>{
+    const commandGet = new QueryCommand({
+        TableName: "Users",
+        KeyConditionExpression: "userId = :targetId",
+        ExpressionAttributeValues:{
+            ":targetId": {S: targetId}
+        }
+    })
+
+    try{
+        console.log("Test")
+        const getResponse = await client.send(commandGet);
+        console.log("Passed Get Command")
+        const items = getResponse.Items;
+        const followingList = items[0].followers.L.map(attr => attr.S);
+
+        const index = followingList.indexOf(userId);
+        console.log(index)
+
+        const commandDelete = new UpdateCommand({
+            TableName: "Users",
+            Key: {
+                userId: targetId,
+            },
+            UpdateExpression: `REMOVE #followers[${index}]`,
+            ExpressionAttributeNames:{
+                '#followers' : 'followers'
+            },
+            ReturnValues: 'UPDATED_NEW'
+        });
+
+        await docClient.send(commandDelete);
+        console.log("Passed Delete Command")
+
+        
+        console.log(`Removed ${userId} from ${targetId}'s followers list`)
+        return(`Removed ${userId} from ${targetId}'s followers list`)
+    } catch(err){
+        if(err.name === 'ValidationException'){
+            const command = new UpdateCommand({
+                TableName: "Users",
+                Key: {
+                    userId: targetId,
+                },
+                UpdateExpression: "SET #followers = list_append(#followers, :followers)",
+                ExpressionAttributeNames:{
+                    '#followers' : 'followers'
+                },
+                ExpressionAttributeValues: {
+                    ':followers' : [userId]
+                },
+                ReturnValues: 'UPDATED_NEW'
+            });
+
+            try{
+                const response = await docClient.send(command);
+                console.log(`Added ${userId} to ${targetId}'s followers list`)
+                return(`Added ${userId} to ${targetId}'s followers list`)
+            } catch(error){
+                return("Fail ", error);
+            }
+        }else{
+            return("Operation Failed.")
+        }
     }
 }
 
 module.exports = { addUser, readUsers, createPost, readPosts, readLikes, 
     readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken,
-    getUserPosts, saveMessage, getMessageHistory, updateFollowing
+    getUserPosts, saveMessage, getMessageHistory, updateFollowing, updateFollowers
  };

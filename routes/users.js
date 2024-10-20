@@ -2,7 +2,7 @@
 const express = require('express');
 const router =  express.Router();
 const { v4: uuidv4 } = require('uuid');
-const { addUser, readUsers, updateFollowing } = require('../database.js');
+const { addUser, readUsers, updateFollowing, updateFollowers } = require('../database.js');
 const { hashPassword } = require('../scripts/encrypt.js')
 const { authenticateToken } = require('../scripts/middleware.js');
 
@@ -40,19 +40,18 @@ router.post('/newUser', async (req, res) => {
     res.redirect('https://main.d1ju3g0cqu0frk.amplifyapp.com/');
 })
 
-router.put('/updateFollowing', async (req, res) =>{
+router.put('/toggleFollowing', async(req, res) =>{
     const {userId, targetId} = req.body;
 
     const result = await updateFollowing(userId, targetId);
-    console.log('Updated following list', {result});
     res.send(result)
-
 })
 
-router.put('/test'), async(req, res) =>{
+router.put('/toggleFollowers', async(req, res) =>{
+    const {userId, targetId} = req.body;
 
-    console.log("User: " + userId + ", Target: " + targetId);
-    res.send(req.body)
-}
+    const result = await updateFollowers(userId, targetId);
+    res.send(result)
+})
 
 module.exports = router;
