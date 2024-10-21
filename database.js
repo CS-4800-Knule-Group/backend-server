@@ -1,5 +1,5 @@
 const { CreateTableCommand, DynamoDBClient, QueryCommand } = require('@aws-sdk/client-dynamodb');
-const { PutCommand, DynamoDBDocumentClient, ScanCommand, DeleteCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
+const { PutCommand, DynamoDBDocumentClient, ScanCommand, DeleteCommand, GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 
 const client = new DynamoDBClient({
     region: "us-west-1",
@@ -168,6 +168,8 @@ const getRtoken = async (userId) => {
     }
 }
 
+
+
 const deleteRtoken = async (userId) => {
     try {
         const command = new DeleteCommand({
@@ -226,7 +228,134 @@ const getMessageHistory = async (conversationId) => {
     }
 }
 
+const updateFollowing = async (userId, targetId) =>{
+    const commandGet = new QueryCommand({
+        TableName: "Users",
+        KeyConditionExpression: "userId = :userId",
+        ExpressionAttributeValues:{
+            ":userId": {S: userId}
+        }
+    })
+
+    try{
+        const getResponse = await client.send(commandGet);
+        const items = getResponse.Items;
+        const followingList = items[0].following.L.map(attr => attr.S);
+
+        const index = followingList.indexOf(targetId);
+
+        const commandDelete = new UpdateCommand({
+            TableName: "Users",
+            Key: {
+                userId: userId,
+            },
+            UpdateExpression: `REMOVE #following[${index}]`,
+            ExpressionAttributeNames:{
+                '#following' : 'following'
+            },
+            ReturnValues: 'UPDATED_NEW'
+        });
+
+        await docClient.send(commandDelete);
+
+        
+        console.log(`Removed ${targetId} from ${userId}'s following list`)
+        return(`Removed ${targetId} from ${userId}'s following list`)
+    } catch(err){
+        if(err.name === 'ValidationException'){
+            const command = new UpdateCommand({
+                TableName: "Users",
+                Key: {
+                    userId: userId,
+                },
+                UpdateExpression: "SET #following = list_append(#following, :following)",
+                ExpressionAttributeNames:{
+                    '#following' : 'following'
+                },
+                ExpressionAttributeValues: {
+                    ':following' : [targetId]
+                },
+                ReturnValues: 'UPDATED_NEW'
+            });
+
+            try{
+                const response = await docClient.send(command);
+                console.log(`Added ${targetId} to ${userId}'s following list`)
+                return(`Added ${targetId} to ${userId}'s following list`)
+            } catch(error){
+                return("Fail ", error);
+            }
+        }else{
+            return("Operation Failed.")
+        }
+    }
+}
+
+const updateFollowers = async (userId, targetId) =>{
+    const commandGet = new QueryCommand({
+        TableName: "Users",
+        KeyConditionExpression: "userId = :targetId",
+        ExpressionAttributeValues:{
+            ":targetId": {S: targetId}
+        }
+    })
+
+    try{
+        const getResponse = await client.send(commandGet);
+        const items = getResponse.Items;
+        const followingList = items[0].followers.L.map(attr => attr.S);
+
+        const index = followingList.indexOf(userId);
+
+        const commandDelete = new UpdateCommand({
+            TableName: "Users",
+            Key: {
+                userId: targetId,
+            },
+            UpdateExpression: `REMOVE #followers[${index}]`,
+            ExpressionAttributeNames:{
+                '#followers' : 'followers'
+            },
+            ReturnValues: 'UPDATED_NEW'
+        });
+
+        await docClient.send(commandDelete);
+        console.log("Passed Delete Command")
+
+        
+        console.log(`Removed ${userId} from ${targetId}'s followers list`)
+        return(`Removed ${userId} from ${targetId}'s followers list`)
+    } catch(err){
+        if(err.name === 'ValidationException'){
+            const command = new UpdateCommand({
+                TableName: "Users",
+                Key: {
+                    userId: targetId,
+                },
+                UpdateExpression: "SET #followers = list_append(#followers, :followers)",
+                ExpressionAttributeNames:{
+                    '#followers' : 'followers'
+                },
+                ExpressionAttributeValues: {
+                    ':followers' : [userId]
+                },
+                ReturnValues: 'UPDATED_NEW'
+            });
+
+            try{
+                const response = await docClient.send(command);
+                console.log(`Added ${userId} to ${targetId}'s followers list`)
+                return(`Added ${userId} to ${targetId}'s followers list`)
+            } catch(error){
+                return("Fail ", error);
+            }
+        }else{
+            return("Operation Failed.")
+        }
+    }
+}
+
 module.exports = { addUser, readUsers, createPost, readPosts, readLikes, 
     readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken,
-    getUserPosts, saveMessage, getMessageHistory
+    getUserPosts, saveMessage, getMessageHistory, updateFollowing, updateFollowers
  };
