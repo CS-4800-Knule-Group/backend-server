@@ -19,6 +19,16 @@ router.post('/newUser', async (req, res) => {
     const fullName = fname + " " + lname
     const hashedPass = await hashPassword(password)
 
+    const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZoneName: 'short'
+    };
+
     const newUser = {
         userId: userId,
         fullName: fullName,
@@ -32,7 +42,7 @@ router.post('/newUser', async (req, res) => {
         followers: [],
         following: [],
         posts: [],
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toLocaleString('en-US', options)
     }
     const result = await addUser(newUser)
     console.log('Received form data: ', { result })
