@@ -35,12 +35,18 @@ const readPosts = async() => {
     return response.Items;
 }
 
-// const readPostsBy = async(userId) => {
-//     const command = new ScanCommand({
-//         TableName: "Posts",
+const readPostsBy = async(userId) => {
+    const command = new ScanCommand({
+        TableName: "Posts",
+        FilterExpression: "userId = :userId",
+        ExpressionAttributeValues: {
+            ":userId": { S: userId}
+        }
+    })
 
-//     })
-// }
+    const response = await client.send(command)
+    return response.Items;
+}
 
 const createPost = async(newPost) => {
     const command = new PutCommand({
@@ -167,8 +173,6 @@ const getRtoken = async (userId) => {
         throw new Error("User does not have a valid refresh token")
     }
 }
-
-
 
 const deleteRtoken = async (userId) => {
     try {
@@ -355,7 +359,7 @@ const updateFollowers = async (userId, targetId) =>{
     }
 }
 
-module.exports = { addUser, readUsers, createPost, readPosts, readLikes, 
+module.exports = { addUser, readUsers, createPost, readPosts, readPostsBy, readLikes, 
     readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken,
     getUserPosts, saveMessage, getMessageHistory, updateFollowing, updateFollowers
  };
