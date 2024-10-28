@@ -12,6 +12,12 @@ router.get('/', async (req, res) => {
     res.json(result)
 })
 
+router.get('/:userId', async (req, res) => {
+    const userId = req.params.userId;
+    const result = await readUser(userId);
+    res.json(result);
+})
+
 router.post('/newUser', async (req, res) => {
     const { fname, lname, username, email, password } = req.body;
 
