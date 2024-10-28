@@ -1,6 +1,8 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const http = require('http');
+const WebSocketServer = require('./wsServer.js')
 
 const app = express();
 
@@ -25,6 +27,11 @@ app.use('/posts', posts);
 app.use('/comments', comments);
 app.use('/likes', likes);
 app.use('/messages', messages);
+
+// create http server from express app
+const server = http.createServer(app)
+// Initialize WebSocketServer to the http server
+WebSocketServer(server);
   
 server.listen(port, () => {
     console.log(`Example app listening on port ${port}`)

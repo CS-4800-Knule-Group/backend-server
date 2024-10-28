@@ -16,19 +16,6 @@ const readUsers = async() => {
     return response.Items;
 }
 
-const readUser = async(userId) => {
-    const command = new ScanCommand({
-        TableName: "Users",
-        FilterExpression: "userId = :userId",
-        ExpressionAttributeValues: {
-            ":userId": { S: userId}
-        }
-    })
-
-    const response = await client.send(command)
-    return response.Items;
-}
-
 const addUser = async(newUser) => {
     const command = new PutCommand({
         TableName: "Users",
@@ -36,7 +23,7 @@ const addUser = async(newUser) => {
     });
 
     const response = await docClient.send(command)
-    return response;        // change this to response.Items to be more consistent with other functions
+    return response;
 }
 
 const readPosts = async() => {
