@@ -16,6 +16,19 @@ const readUsers = async() => {
     return response.Items;
 }
 
+const readUser = async(userId) => {
+    const command = new ScanCommand({
+        TableName: "Users",
+        FilterExpression: "userId = :userId",
+        ExpressionAttributeValues: {
+            ":userId": { S: userId}
+        }
+    })
+
+    const response = await client.send(command)
+    return response.Items;
+}
+
 const addUser = async(newUser) => {
     const command = new PutCommand({
         TableName: "Users",
@@ -359,7 +372,7 @@ const updateFollowers = async (userId, targetId) =>{
     }
 }
 
-module.exports = { addUser, readUsers, createPost, readPosts, readPostsBy, readLikes, 
+module.exports = { addUser, readUsers, readUser, createPost, readPosts, readPostsBy, readLikes, 
     readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken,
     getUserPosts, saveMessage, getMessageHistory, updateFollowing, updateFollowers
  };

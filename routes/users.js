@@ -2,7 +2,7 @@
 const express = require('express');
 const router =  express.Router();
 const { v4: uuidv4 } = require('uuid');
-const { addUser, readUsers, updateFollowing, updateFollowers } = require('../database.js');
+const { addUser, readUsers, readUser, updateFollowing, updateFollowers } = require('../database.js');
 const { hashPassword } = require('../scripts/encrypt.js')
 const { authenticateToken } = require('../scripts/middleware.js');
 
@@ -10,6 +10,12 @@ const { authenticateToken } = require('../scripts/middleware.js');
 router.get('/', async (req, res) => {
     const result = await readUsers();
     res.json(result)
+})
+
+router.get('/:userId', async (req, res) => {
+    const userId = req.params.userId;
+    const result = await readUser(userId);
+    res.json(result);
 })
 
 router.post('/newUser', async (req, res) => {
