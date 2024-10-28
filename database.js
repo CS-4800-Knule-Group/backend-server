@@ -1,4 +1,4 @@
-const { CreateTableCommand, DynamoDBClient, QueryCommand } = require('@aws-sdk/client-dynamodb');
+const { CreateTableCommand, DynamoDBClient, QueryCommand, GetItemCommand } = require('@aws-sdk/client-dynamodb');
 const { PutCommand, DynamoDBDocumentClient, ScanCommand, DeleteCommand, GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 
 const client = new DynamoDBClient({
@@ -17,13 +17,12 @@ const readUsers = async() => {
 }
 
 const readUser = async(userId) => {
-    const command = new ScanCommand({
+    const command = new GetItemCommand({
         TableName: "Users",
-        FilterExpression: "userId = :userId",
-        ExpressionAttributeValues: {
-            ":userId": { S: userId}
+        Key: {
+            userId: { S: userId }
         }
-    })
+    });
 
     const response = await client.send(command)
     return response.Items;
