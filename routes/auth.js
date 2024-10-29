@@ -25,7 +25,7 @@ router.post('/login', async (req, res) => {
             rToken: encrypedToken
         }
         await addRtoken(rToken)
-        res.json({ acessToken: accessToken })
+        res.json({ accessToken: accessToken })
     } else {
         res.send("failed to login")
     }
