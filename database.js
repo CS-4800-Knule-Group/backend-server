@@ -1,4 +1,4 @@
-const { CreateTableCommand, DynamoDBClient, QueryCommand } = require('@aws-sdk/client-dynamodb');
+const { CreateTableCommand, DynamoDBClient, QueryCommand, GetItemCommand } = require('@aws-sdk/client-dynamodb');
 const { PutCommand, DynamoDBDocumentClient, ScanCommand, DeleteCommand, GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 
 const client = new DynamoDBClient({
@@ -13,6 +13,18 @@ const readUsers = async() => {
 
     const response = await docClient.send(command);
     // console.log("Table data:", response.Items);
+    return response.Items;
+}
+
+const readUser = async(userId) => {
+    const command = new GetItemCommand({
+        TableName: "Users",
+        Key: {
+            userId: { S: userId }
+        }
+    });
+
+    const response = await client.send(command)
     return response.Items;
 }
 
@@ -359,7 +371,7 @@ const updateFollowers = async (userId, targetId) =>{
     }
 }
 
-module.exports = { addUser, readUsers, createPost, readPosts, readPostsBy, readLikes, 
+module.exports = { addUser, readUsers, readUser, createPost, readPosts, readPostsBy, readLikes, 
     readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken,
     getUserPosts, saveMessage, getMessageHistory, updateFollowing, updateFollowers
  };
