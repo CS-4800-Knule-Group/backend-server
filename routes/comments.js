@@ -19,13 +19,23 @@ router.post('/:userId', async (req, res) => {
         parentCommentId = null
     }
 
+    const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZoneName: 'short'
+    };
+
     const newComment = {
         postId: postId,
         commentId: commentId,
         parentCommentId: parentCommentId,
         userId: userId,
         content: content,
-        createdAt: new Date().toISOString(),
+        createdAt: new Date().toLocaleString('en-US', options),
     }
 
     const result = await createComment(newComment);

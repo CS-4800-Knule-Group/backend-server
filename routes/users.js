@@ -1,11 +1,11 @@
 // users.js route module
 const express = require('express');
 const router =  express.Router();
-const { v4: uuidv4 } = require('uuid');
 const { addUser, readUsers, updateFollowing, updateFollowers } = require('../database.js');
 const { hashPassword } = require('../scripts/encrypt.js')
 const { authenticateToken } = require('../scripts/middleware.js');
 
+const uid = new ShortUniqueId({ length: 8 });
 
 router.get('/', async (req, res) => {
     const result = await readUsers();
@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
 router.post('/newUser', async (req, res) => {
     const { fname, lname, username, email, password } = req.body;
 
-    const userId = uuidv4();
+    const userId = uid.rnd();
     const fullName = fname + " " + lname
     const hashedPass = await hashPassword(password)
 
