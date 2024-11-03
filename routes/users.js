@@ -21,9 +21,8 @@ router.get('/:userId', async (req, res) => {
 
 router.post('/newUser', async (req, res) => {
     const { fname, lname, username, email, password } = req.body;
-
     // check if username is unique
-    if (!validUsername(username)) {
+    if (!(await validUsername(username))) {
         return res.status(404).json({error: "Username is already taken"})
     }
 
