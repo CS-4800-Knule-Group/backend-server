@@ -22,7 +22,7 @@ const s3 = new S3Client({
     region: bucketRegion
 })
 
-const createImg = async(imgData, userId) => {
+const createPfpImg = async(imgData) => {
 
     const imgName = randomImgName();
 
@@ -40,9 +40,13 @@ const createImg = async(imgData, userId) => {
 
     const command = new PutObjectCommand(params)
 
-    await s3.send(command)
+    try{
+        await s3.send(command)
+        return imgName;
+    } catch(err){
+        console.log("Failed to upload to s3 bucket.")
+    }
 
-    updateUser(userId, fileBuffer, "pfp")
 
     //Insert database post here
 }
@@ -50,5 +54,5 @@ const createImg = async(imgData, userId) => {
 
 
 
-module.exports = {createImg
+module.exports = {createPfpImg
 }

@@ -2,10 +2,10 @@
 const express = require('express');
 const router =  express.Router();
 const { v4: uuidv4 } = require('uuid');
-const { addUser, readUsers, updateFollowing, updateFollowers } = require('../database.js');
+const { addUser, readUsers, updateFollowing, updateFollowers, updateUser } = require('../database.js');
 const { hashPassword } = require('../scripts/encrypt.js')
 const { authenticateToken, multipartData } = require('../scripts/middleware.js');
-const { createImg } = require('../s3bucket.js');
+const { createPfpImg } = require('../s3bucket.js');
 
 
 router.get('/', async (req, res) => {
@@ -57,9 +57,19 @@ router.put('/toggleFollowers', async(req, res) =>{
 
 router.put('/updateProfile', multipartData('image'), async(req, res) => {
     console.log("req.body - userId : ", req.body.userId)
-    console.log("req.body - caption : ", req.body.caption)
     console.log("req.file", req.file)
-    //createImg(req.file, req.body.userId)
+
+    const userId = req.body.userId
+    const bio = req.body.bio
+    const name = req.body.name
+
+    
+    try{
+        const pfpName = await createPfpImg(req.file, req.body.userId)
+        await updateUser(userId, bio, name, pfpName)
+    } catch(err){
+        console.log("Update user failed: ", err);
+    }
 })
 
 module.exports = router;

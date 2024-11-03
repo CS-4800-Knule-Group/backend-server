@@ -355,26 +355,32 @@ const updateFollowers = async (userId, targetId) =>{
     }
 }
 
-const updateUser = async(userId, data, target) => {
+const updateUser = async(userId, bio, name, pfp = "default.png", banner = 'default-banner.png') => {
     const command = new UpdateCommand({
         TableName: "Users",
         Key : {
             userId : userId,
         },
-        UpdateExpression : "SET #value = :newValue",
+        UpdateExpression : "SET #bio = :newBio, #fullName = :newName, #pfp = :newPfp, #pfBanner = :newBanner",
         ExpressionAttributeNames: {
-            "#value" : target
+            "#bio" : "bio",
+            "#fullName" : "fullName",
+            "#pfp" : "pfp",
+            "#pfBanner" : "pfBanner"
         },
         ExpressionAttributeValues:{
-            ":newpfp" : data
+            ":newBio" : bio,
+            ":newName" : name,
+            ":newPfp" : pfp,
+            ":newBanner" : banner
         }
     })
 
     try{
-        const response = docClient.send(command);
-        console.log("Updated " + target)
+        await docClient.send(command);
+        console.log("Updated " + userId)
     } catch(err){
-        console.log("Failed to update " + target);
+        console.log("Failed to update " + userId);
     }
 }
 
