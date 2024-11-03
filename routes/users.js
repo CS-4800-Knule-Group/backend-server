@@ -4,7 +4,8 @@ const router =  express.Router();
 const { v4: uuidv4 } = require('uuid');
 const { addUser, readUsers, updateFollowing, updateFollowers } = require('../database.js');
 const { hashPassword } = require('../scripts/encrypt.js')
-const { authenticateToken } = require('../scripts/middleware.js');
+const { authenticateToken, multipartData } = require('../scripts/middleware.js');
+const { createImg } = require('../s3bucket.js');
 
 
 router.get('/', async (req, res) => {
@@ -52,6 +53,13 @@ router.put('/toggleFollowers', async(req, res) =>{
 
     const result = await updateFollowers(userId, targetId);
     res.send(result)
+})
+
+router.put('/updateProfile', multipartData('image'), async(req, res) => {
+    console.log("req.body - userId : ", req.body.userId)
+    console.log("req.body - caption : ", req.body.caption)
+    console.log("req.file", req.file)
+    //createImg(req.file, req.body.userId)
 })
 
 module.exports = router;

@@ -14,6 +14,7 @@
   "description": "",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.645.0",
+    "@aws-sdk/client-s3": "^3.685.0",
     "@aws-sdk/credential-providers": "^3.645.0",
     "@aws-sdk/lib-dynamodb": "^3.645.0",
     "@aws-sdk/util-dynamodb": "^3.645.0",
@@ -24,6 +25,8 @@
     "fs": "^0.0.1-security",
     "https": "^1.0.0",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.33.5",
     "short-unique-id": "^5.2.0",
     "uuid": "^10.0.0",
     "ws": "^8.18.0"

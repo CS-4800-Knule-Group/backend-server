@@ -355,7 +355,31 @@ const updateFollowers = async (userId, targetId) =>{
     }
 }
 
+const updateUser = async(userId, data, target) => {
+    const command = new UpdateCommand({
+        TableName: "Users",
+        Key : {
+            userId : userId,
+        },
+        UpdateExpression : "SET #value = :newValue",
+        ExpressionAttributeNames: {
+            "#value" : target
+        },
+        ExpressionAttributeValues:{
+            ":newpfp" : data
+        }
+    })
+
+    try{
+        const response = docClient.send(command);
+        console.log("Updated " + target)
+    } catch(err){
+        console.log("Failed to update " + target);
+    }
+}
+
 module.exports = { addUser, readUsers, createPost, readPosts, readLikes, 
     readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken,
-    getUserPosts, saveMessage, getMessageHistory, updateFollowing, updateFollowers
+    getUserPosts, saveMessage, getMessageHistory, updateFollowing, updateFollowers,
+    updateUser
  };
