@@ -1,4 +1,5 @@
-const {S3Client, PutObjectCommand} = require("@aws-sdk/client-s3");
+const {S3Client, PutObjectCommand, GetObjectCommand} = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
 const dotenv = require('dotenv');
 const crypto = require('crypto')
 const sharp = require('sharp');
@@ -46,13 +47,22 @@ const createPfpImg = async(imgData) => {
     } catch(err){
         console.log("Failed to upload to s3 bucket.")
     }
+}
 
+const getPfpImg = async(imgName) => {
+    const getobjectParams = {
+        Bucket : bucketName,
+        Key : imgName
+    }
+    const command = new GetObjectCommand(getobjectParams);
+    const url = await getSignedUrl(s3, command, {expiresIn: 3600});
 
-    //Insert database post here
+    return url;
+
 }
 
 
 
 
-module.exports = {createPfpImg
+module.exports = {createPfpImg, getPfpImg
 }

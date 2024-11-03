@@ -5,11 +5,20 @@ const { v4: uuidv4 } = require('uuid');
 const { addUser, readUsers, updateFollowing, updateFollowers, updateUser } = require('../database.js');
 const { hashPassword } = require('../scripts/encrypt.js')
 const { authenticateToken, multipartData } = require('../scripts/middleware.js');
-const { createPfpImg } = require('../s3bucket.js');
+const { createPfpImg, getPfpImg } = require('../s3bucket.js');
 
 
 router.get('/', async (req, res) => {
     const result = await readUsers();
+    for(const user of result){
+        if(user.pfp == undefined){
+
+        }else{
+            console.log(user.pfp)
+            user.pfp = await getPfpImg(user.pfp)
+            console.log(user.pfp);
+        }
+    }
     res.json(result)
 })
 
