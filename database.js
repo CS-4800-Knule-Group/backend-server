@@ -28,6 +28,26 @@ const readUser = async(userId) => {
     return response.Items;
 }
 
+const validUsername = async (username) => {
+    const command = new QueryCommand({
+        TableName: "Users",
+        IndexName: "username-index",
+        KeyConditionExpression: "username = :username",
+        ExpressionAttributeValues: {
+            ':username': { S: username }
+        },
+        ProjectionExpression: "username"
+    })
+
+    try {
+        const response = await client.send(command);
+        return response.Items.length === 0; // If no items are returned, the username is unique
+    } catch (error) {
+        console.error("Error checking username uniqueness:", error);
+        throw error;
+    }
+};
+
 const addUser = async(newUser) => {
     const command = new PutCommand({
         TableName: "Users",
@@ -373,5 +393,5 @@ const updateFollowers = async (userId, targetId) =>{
 
 module.exports = { addUser, readUsers, readUser, createPost, readPosts, readPostsBy, readLikes, 
     readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken,
-    getUserPosts, saveMessage, getMessageHistory, updateFollowing, updateFollowers
+    getUserPosts, saveMessage, getMessageHistory, updateFollowing, updateFollowers, validUsername
  };

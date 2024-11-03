@@ -2,7 +2,7 @@
 const express = require('express');
 const router =  express.Router();
 const ShortUniqueId = require('short-unique-id');
-const { addUser, readUsers, readUser, updateFollowing, updateFollowers } = require('../database.js');
+const { addUser, readUsers, readUser, updateFollowing, updateFollowers, validUsername } = require('../database.js');
 const { hashPassword } = require('../scripts/encrypt.js')
 const { authenticateToken } = require('../scripts/middleware.js');
 
@@ -21,6 +21,11 @@ router.get('/:userId', async (req, res) => {
 
 router.post('/newUser', async (req, res) => {
     const { fname, lname, username, email, password } = req.body;
+
+    // check if username is unique
+    if (!validUsername(username)) {
+        return res.status(404).json({error: "Username is already taken"})
+    }
 
     const userId = uid.rnd();
     const fullName = fname + " " + lname
@@ -44,11 +49,12 @@ router.post('/newUser', async (req, res) => {
         lastName: lname,
         email: email,
         password: hashedPass,
+        pfp: "default.png",
+        pfBanner: "default-banner.png",
         bio: "",
         friends: [],
         followers: [],
         following: [],
-        posts: [],
         createdAt: new Date().toLocaleString('en-US', options)
     }
     const result = await addUser(newUser)
