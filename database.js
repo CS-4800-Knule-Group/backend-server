@@ -355,7 +355,7 @@ const updateFollowers = async (userId, targetId) =>{
     }
 }
 
-const updateUser = async(userId, bio, name, pfp = "DNE", banner = 'DNE') => {
+const updateUser = async(userId, bio, name, pfp = "DNE", banner = "DNE") => {
     let updateExpression = "SET #bio = :newBio, #fullName = :newName, #pfp = :newPfp, #pfBanner = :newBanner"
     let ExpressionAttributeNames = {
         "#bio" : "bio",
@@ -369,6 +369,7 @@ const updateUser = async(userId, bio, name, pfp = "DNE", banner = 'DNE') => {
         ":newPfp" : pfp,
         ":newBanner" : banner
     }
+    
 
     if(pfp == "DNE" & banner == "DNE"){
         updateExpression = "SET #bio = :newBio, #fullName = :newName"
@@ -392,7 +393,7 @@ const updateUser = async(userId, bio, name, pfp = "DNE", banner = 'DNE') => {
             ":newName" : name,
             ":newBanner" : banner
         }
-    } else if (banner = "DNE"){
+    } else if (banner == "DNE"){
         updateExpression = "SET #bio = :newBio, #fullName = :newName, #pfp = :newPfp"
         ExpressionAttributeNames = {
             "#bio" : "bio",
@@ -414,7 +415,7 @@ const updateUser = async(userId, bio, name, pfp = "DNE", banner = 'DNE') => {
         },
         UpdateExpression : updateExpression,
         ExpressionAttributeNames: ExpressionAttributeNames,
-        ExpressionAttributeValues:ExpressionAttributeValues
+        ExpressionAttributeValues: ExpressionAttributeValues
     })
 
     try{

@@ -4,8 +4,8 @@ const router =  express.Router();
 const { v4: uuidv4 } = require('uuid');
 const { addUser, readUsers, updateFollowing, updateFollowers, updateUser } = require('../database.js');
 const { hashPassword } = require('../scripts/encrypt.js')
-const { authenticateToken, multipartData } = require('../scripts/middleware.js');
-const { createPfpImg, getPfpImg } = require('../s3bucket.js');
+const { authenticateToken, multipartSingle, multipartDouble } = require('../scripts/middleware.js');
+const { getPfpImg, createImg } = require('../s3bucket.js');
 
 
 router.get('/', async (req, res) => {
@@ -64,23 +64,33 @@ router.put('/toggleFollowers', async(req, res) =>{
     res.send(result)
 })
 
-router.put('/updateProfile', multipartData('image'), async(req, res) => {
+router.put('/updateProfile', multipartDouble(), async(req, res) => {
     console.log("req.body - userId : ", req.body.userId)
-    console.log("req.file", req.file)
+    console.log("req.file", req.files.pfp)
+    console.log("2nd req.file", req.files.banner)
     console.log("req.body - bio : ", req.body.bio);
     console.log("req.body - fullName : ", req.body.name)
 
     const userId = req.body.userId
     const bio = req.body.bio
     const name = req.body.name
+    
 
     
     try{
-        if(req.file != undefined){   
-            const pfpName = await createPfpImg(req.file, req.body.userId)
-            await updateUser(userId, bio, name, pfpName)
-        } else{
+        if(req.files.pfp == undefined && req.files.banner == undefined){   
             await updateUser(userId, bio, name)
+        } else if (req.files.banner == undefined){
+            const pfpName = await createImg(req.files.pfp[0], 150, 150)
+            await updateUser(userId, bio, name, pfpName)
+        } else if (req.files.pfp == undefined){
+            const bannerName = await createImg(req.files.banner[0], 400, 1875)
+            await updateUser(userId, bio, name, "DNE", bannerName)
+        }
+        else{
+            const pfpName = await createImg(req.files.pfp[0], 150, 150)
+            const bannerName = await createImg(req.files.banner[0], 400, 1875)
+            await updateUser(userId, bio, name, pfpName, bannerName)
         }
     } catch(err){
         console.log("Update user failed: ", err);

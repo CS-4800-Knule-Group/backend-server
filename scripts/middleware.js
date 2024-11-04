@@ -20,9 +20,16 @@ function authenticateToken(req, res, next) {
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage})
 
-function multipartData(type){
+function multipartSingle(type){
     return upload.single(type);
 }
 
+function multipartDouble(){
+    return upload.fields([
+        {name : "pfp", maxCount:1},
+        {name : "banner", maxCount:1},
+    ])
+}
 
-module.exports = { authenticateToken, multipartData }
+
+module.exports = { authenticateToken, multipartSingle, multipartDouble }

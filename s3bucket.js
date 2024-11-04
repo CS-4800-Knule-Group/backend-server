@@ -23,12 +23,12 @@ const s3 = new S3Client({
     region: bucketRegion
 })
 
-const createPfpImg = async(imgData) => {
+const createImg = async(imgData, height, width) => {
 
     const imgName = randomImgName();
 
     const fileBuffer = await sharp(imgData.buffer)
-        .resize({height: 150, width: 150, fit: "contain"})
+        .resize({height: height, width: width, fit: "contain"})
         .toBuffer()
 
 
@@ -64,5 +64,7 @@ const getPfpImg = async(imgName) => {
 
 
 
-module.exports = {createPfpImg, getPfpImg
+
+
+module.exports = {createImg, getPfpImg
 }
