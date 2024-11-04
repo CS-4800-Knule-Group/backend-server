@@ -355,32 +355,73 @@ const updateFollowers = async (userId, targetId) =>{
     }
 }
 
-const updateUser = async(userId, bio, name, pfp = "default.png", banner = 'default-banner.png') => {
+const updateUser = async(userId, bio, name, pfp = "DNE", banner = 'DNE') => {
+    let updateExpression = "SET #bio = :newBio, #fullName = :newName, #pfp = :newPfp, #pfBanner = :newBanner"
+    let ExpressionAttributeNames = {
+        "#bio" : "bio",
+        "#fullName" : "fullName",
+        "#pfp" : "pfp",
+        "#pfBanner" : "pfBanner"
+    }
+    let ExpressionAttributeValues = {
+        ":newBio" : bio,
+        ":newName" : name,
+        ":newPfp" : pfp,
+        ":newBanner" : banner
+    }
+
+    if(pfp == "DNE" & banner == "DNE"){
+        updateExpression = "SET #bio = :newBio, #fullName = :newName"
+        ExpressionAttributeNames = {
+            "#bio" : "bio",
+            "#fullName" : "fullName",
+        }
+        ExpressionAttributeValues = {
+            ":newBio" : bio,
+            ":newName" : name,
+        }
+    }else if(pfp == "DNE"){
+        updateExpression = "SET #bio = :newBio, #fullName = :newName, #pfBanner = :newBanner"    
+        ExpressionAttributeNames = {
+            "#bio" : "bio",
+            "#fullName" : "fullName",
+            "#pfBanner" : "pfBanner"
+        }
+        ExpressionAttributeValues = {
+            ":newBio" : bio,
+            ":newName" : name,
+            ":newBanner" : banner
+        }
+    } else if (banner = "DNE"){
+        updateExpression = "SET #bio = :newBio, #fullName = :newName, #pfp = :newPfp"
+        ExpressionAttributeNames = {
+            "#bio" : "bio",
+            "#fullName" : "fullName",
+            "#pfp" : "pfp",
+        }
+        ExpressionAttributeValues = {
+            ":newBio" : bio,
+            ":newName" : name,
+            ":newPfp" : pfp,
+        }
+    }
+
+
     const command = new UpdateCommand({
         TableName: "Users",
         Key : {
             userId : userId,
         },
-        UpdateExpression : "SET #bio = :newBio, #fullName = :newName, #pfp = :newPfp, #pfBanner = :newBanner",
-        ExpressionAttributeNames: {
-            "#bio" : "bio",
-            "#fullName" : "fullName",
-            "#pfp" : "pfp",
-            "#pfBanner" : "pfBanner"
-        },
-        ExpressionAttributeValues:{
-            ":newBio" : bio,
-            ":newName" : name,
-            ":newPfp" : pfp,
-            ":newBanner" : banner
-        }
+        UpdateExpression : updateExpression,
+        ExpressionAttributeNames: ExpressionAttributeNames,
+        ExpressionAttributeValues:ExpressionAttributeValues
     })
 
     try{
         await docClient.send(command);
         console.log("Updated " + userId)
     } catch(err){
-        console.log("Failed to update " + userId);
+        console.log("Failed to update " + userId + err);
     }
 }
 

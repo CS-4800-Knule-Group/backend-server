@@ -67,6 +67,8 @@ router.put('/toggleFollowers', async(req, res) =>{
 router.put('/updateProfile', multipartData('image'), async(req, res) => {
     console.log("req.body - userId : ", req.body.userId)
     console.log("req.file", req.file)
+    console.log("req.body - bio : ", req.body.bio);
+    console.log("req.body - fullName : ", req.body.name)
 
     const userId = req.body.userId
     const bio = req.body.bio
@@ -74,8 +76,12 @@ router.put('/updateProfile', multipartData('image'), async(req, res) => {
 
     
     try{
-        const pfpName = await createPfpImg(req.file, req.body.userId)
-        await updateUser(userId, bio, name, pfpName)
+        if(req.file != undefined){   
+            const pfpName = await createPfpImg(req.file, req.body.userId)
+            await updateUser(userId, bio, name, pfpName)
+        } else{
+            await updateUser(userId, bio, name)
+        }
     } catch(err){
         console.log("Update user failed: ", err);
     }
