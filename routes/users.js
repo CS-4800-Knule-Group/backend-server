@@ -5,19 +5,21 @@ const ShortUniqueId = require('short-unique-id');
 const { addUser, readUsers, readUser, updateFollowing, updateFollowers, validUsername, updateUser } = require('../database.js');
 const { hashPassword } = require('../scripts/encrypt.js')
 const { authenticateToken, multipartSingle, multipartDouble } = require('../scripts/middleware.js');
-const { getPfpImg, createImg } = require('../s3bucket.js');
+const { createImg, getImg } = require('../s3bucket.js');
 
 const uid = new ShortUniqueId({ length: 8 });
 
 router.get('/', async (req, res) => {
     const result = await readUsers();
     for(const user of result){
-        if(user.pfp == undefined){
-
-        }else{
+        if(user.pfp != undefined && user.pfBanner != undefined){
+            user.pfp = await getImg(user.pfp)
+            user.pfBanner = await getImg(user.pfBanner)
+        }else if (user.pfp != undefined && user.pfBanner == undefined){
             console.log(user.pfp)
-            user.pfp = await getPfpImg(user.pfp)
-            console.log(user.pfp);
+            user.pfp = await getImg(user.pfp)
+        } else if(user.pfp == undefined && user.pfBanner != undefined){
+            user.pfBanner = await getImg(user.pfBanner)
         }
     }
     res.json(result)

@@ -49,7 +49,7 @@ const createImg = async(imgData, height, width) => {
     }
 }
 
-const getPfpImg = async(imgName) => {
+const getImg = async(imgName) => {
     const getobjectParams = {
         Bucket : bucketName,
         Key : imgName
@@ -66,5 +66,5 @@ const getPfpImg = async(imgName) => {
 
 
 
-module.exports = {createImg, getPfpImg
+module.exports = {createImg, getImg
 }
