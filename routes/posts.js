@@ -20,17 +20,27 @@ router.get('/', async (req, res) => {
     res.json(result);
 })
 
-router.post('/:userId', async (req, res) => {
+router.post('/:userId', authenticateToken, async (req, res) => {
     const postId = uid.rnd();
     const userId = req.params.userId;
     // userId can also be passed through body (maybe) depends on front end implementation
     const { content } = req.body;
+
+    const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZoneName: 'short'
+    };
     
     const newPost = {
         postId: postId,
         userId: userId,
         content: content,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toLocaleString('en-US', options),
         likes: [],
         comments: []
     }
@@ -41,7 +51,7 @@ router.post('/:userId', async (req, res) => {
 })
 
 // route to get all posts from a user
-router.get('/:userId', async (req, res) => {
+router.get('/:userId', authenticateToken, async (req, res) => {
     const userId = req.params.userId
     const userPosts = await getUserPosts(userId)
     res.json(userPosts)

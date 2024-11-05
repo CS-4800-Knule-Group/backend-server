@@ -1,12 +1,13 @@
 // users.js route module
 const express = require('express');
 const router =  express.Router();
-const { v4: uuidv4 } = require('uuid');
-const { addUser, readUsers, updateFollowing, updateFollowers, updateUser } = require('../database.js');
+const ShortUniqueId = require('short-unique-id');
+const { addUser, readUsers, readUser, updateFollowing, updateFollowers, validUsername, updateUser } = require('../database.js');
 const { hashPassword } = require('../scripts/encrypt.js')
 const { authenticateToken, multipartSingle, multipartDouble } = require('../scripts/middleware.js');
 const { getPfpImg, createImg } = require('../s3bucket.js');
 
+const uid = new ShortUniqueId({ length: 8 });
 
 router.get('/', async (req, res) => {
     const result = await readUsers();
@@ -22,12 +23,32 @@ router.get('/', async (req, res) => {
     res.json(result)
 })
 
+router.get('/:userId', async (req, res) => {
+    const userId = req.params.userId;
+    const result = await readUser(userId);
+    res.json(result);
+})
+
 router.post('/newUser', async (req, res) => {
     const { fname, lname, username, email, password } = req.body;
+    // check if username is unique
+    if (!(await validUsername(username))) {
+        return res.status(404).json({error: "Username is already taken"})
+    }
 
-    const userId = uuidv4();
+    const userId = uid.rnd();
     const fullName = fname + " " + lname
     const hashedPass = await hashPassword(password)
+
+    const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZoneName: 'short'
+    };
 
     const newUser = {
         userId: userId,
@@ -37,12 +58,13 @@ router.post('/newUser', async (req, res) => {
         lastName: lname,
         email: email,
         password: hashedPass,
+        pfp: "default.png",
+        pfBanner: "default-banner.png",
         bio: "",
         friends: [],
         followers: [],
         following: [],
-        posts: [],
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toLocaleString('en-US', options)
     }
     const result = await addUser(newUser)
     console.log('Received form data: ', { result })

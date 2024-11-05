@@ -18,7 +18,7 @@ router.post('/:targetId', async (req, res) => {
         userId: userId,
         like: like,
         targetType: targetType,
-        createdAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),    // probably don't need this
         targetOwnerId: targetOwnerId
     }
     const reuslt = await createPost(newLike)

@@ -1,4 +1,4 @@
-const { CreateTableCommand, DynamoDBClient, QueryCommand } = require('@aws-sdk/client-dynamodb');
+const { CreateTableCommand, DynamoDBClient, QueryCommand, GetItemCommand } = require('@aws-sdk/client-dynamodb');
 const { PutCommand, DynamoDBDocumentClient, ScanCommand, DeleteCommand, GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 
 const client = new DynamoDBClient({
@@ -15,6 +15,38 @@ const readUsers = async() => {
     // console.log("Table data:", response.Items);
     return response.Items;
 }
+
+const readUser = async(userId) => {
+    const command = new GetItemCommand({
+        TableName: "Users",
+        Key: {
+            userId: { S: userId }
+        }
+    });
+
+    const response = await client.send(command)
+    return response.Items;
+}
+
+const validUsername = async (username) => {
+    const command = new QueryCommand({
+        TableName: "Users",
+        IndexName: "username-index",
+        KeyConditionExpression: "username = :username",
+        ExpressionAttributeValues: {
+            ':username': { S: username }
+        },
+        ProjectionExpression: "username"
+    })
+
+    try {
+        const response = await client.send(command);
+        return response.Items.length === 0; // If no items are returned, the username is unique
+    } catch (error) {
+        console.error("Error checking username uniqueness:", error);
+        throw error;
+    }
+};
 
 const addUser = async(newUser) => {
     const command = new PutCommand({
@@ -35,12 +67,18 @@ const readPosts = async() => {
     return response.Items;
 }
 
-// const readPostsBy = async(userId) => {
-//     const command = new ScanCommand({
-//         TableName: "Posts",
+const readPostsBy = async(userId) => {
+    const command = new ScanCommand({
+        TableName: "Posts",
+        FilterExpression: "userId = :userId",
+        ExpressionAttributeValues: {
+            ":userId": { S: userId}
+        }
+    })
 
-//     })
-// }
+    const response = await client.send(command)
+    return response.Items;
+}
 
 const createPost = async(newPost) => {
     const command = new PutCommand({
@@ -167,8 +205,6 @@ const getRtoken = async (userId) => {
         throw new Error("User does not have a valid refresh token")
     }
 }
-
-
 
 const deleteRtoken = async (userId) => {
     try {
@@ -429,5 +465,5 @@ const updateUser = async(userId, bio, name, pfp = "DNE", banner = "DNE") => {
 module.exports = { addUser, readUsers, createPost, readPosts, readLikes, 
     readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken,
     getUserPosts, saveMessage, getMessageHistory, updateFollowing, updateFollowers,
-    updateUser
+    updateUser, validUsername
  };
