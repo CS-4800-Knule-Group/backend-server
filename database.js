@@ -1,10 +1,13 @@
 const { CreateTableCommand, DynamoDBClient, QueryCommand, GetItemCommand } = require('@aws-sdk/client-dynamodb');
 const { PutCommand, DynamoDBDocumentClient, ScanCommand, DeleteCommand, GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
+const { stat } = require('fs');
 
 const client = new DynamoDBClient({
     region: "us-west-1",
 });
-const docClient = DynamoDBDocumentClient.from(client);
+const docClient = DynamoDBDocumentClient.from(client);  
+// use docClient , this is the higher level one and easier to work with
+// need to change all functions using client --> docClient
 
 const readUsers = async() => {
     const command = new ScanCommand({
@@ -55,7 +58,13 @@ const addUser = async(newUser) => {
     });
 
     const response = await docClient.send(command)
-    return response;
+    // console.log(response['$metadata'].httpStatusCode)
+    const statusCode = response['$metadata'].httpStatusCode;
+    if (statusCode == 200) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 const readPosts = async() => {
