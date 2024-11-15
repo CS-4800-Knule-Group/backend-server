@@ -28,7 +28,7 @@ const readUser = async(userId) => {
     });
 
     const response = await client.send(command)
-    return response.Items;
+    return response.Item;
 }
 
 const validUsername = async (username) => {

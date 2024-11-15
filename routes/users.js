@@ -22,13 +22,19 @@ router.get('/', async (req, res) => {
             user.pfBanner = await getImg(user.pfBanner)
         }
     }
-    res.json(result)
+    res.status(200).json(result)
 })
 
 router.get('/:userId', async (req, res) => {
     const userId = req.params.userId;
     const result = await readUser(userId);
-    res.json(result);
+
+    if (!result) {
+        return res.status(404).json({message: "User not found"});
+    }
+    else {
+        res.status(200).json(result);
+    }
 })
 
 router.post('/newUser', async (req, res) => {
@@ -71,21 +77,21 @@ router.post('/newUser', async (req, res) => {
     const result = await addUser(newUser)
     console.log('Received form data: ', { result })
 
-    res.redirect('https://main.d1ju3g0cqu0frk.amplifyapp.com/');
+    res.status(201).redirect('https://main.d1ju3g0cqu0frk.amplifyapp.com/');
 })
 
 router.put('/toggleFollowing', async(req, res) =>{
     const {userId, targetId} = req.body;
 
     const result = await updateFollowing(userId, targetId);
-    res.send(result)
+    res.status(200).send(result)
 })
 
 router.put('/toggleFollowers', async(req, res) =>{
     const {userId, targetId} = req.body;
 
     const result = await updateFollowers(userId, targetId);
-    res.send(result)
+    res.status(200).send(result)
 })
 
 router.put('/updateProfile', multipartDouble(), async(req, res) => {
@@ -98,8 +104,6 @@ router.put('/updateProfile', multipartDouble(), async(req, res) => {
     const userId = req.body.userId
     const bio = req.body.bio
     const name = req.body.name
-    
-
     
     try{
         if(req.files.pfp == undefined && req.files.banner == undefined){   
