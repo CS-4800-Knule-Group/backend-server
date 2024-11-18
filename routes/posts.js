@@ -1,7 +1,7 @@
 const express = require('express');
 const ShortUniqueId = require('short-unique-id');
 const router = express.Router();
-const { createPost, readPosts, getUserPosts } = require('../database.js');
+const { createPost, readPosts, getUserPosts, delPost } = require('../database.js');
 const { authenticateToken } = require('../scripts/middleware.js');
 
 const uid = new ShortUniqueId({ length: 10 });
@@ -12,8 +12,8 @@ router.get('/', async (req, res) => {
     res.status(200).json(result);
 })
 
-// router.post('/:userId', authenticateToken, async (req, res) => {
-router.post('/:userId', async (req, res) => {
+router.post('/:userId', authenticateToken, async (req, res) => {
+// router.post('/:userId', async (req, res) => {
     const postId = uid.rnd();
     const userId = req.params.userId;
     // userId can also be passed through body (maybe) depends on front end implementation
@@ -44,16 +44,39 @@ router.post('/:userId', async (req, res) => {
 })
 
 // route to get all posts from a user
-// router.get('/:userId', authenticateToken, async (req, res) => {
-router.get('/:userId', async (req, res) => {
+router.get('/:userId', authenticateToken, async (req, res) => {
+// router.get('/:userId', async (req, res) => {
     const userId = req.params.userId
     const userPosts = await getUserPosts(userId)
     res.status(200).json(userPosts)
 })
 
 // could be potential route for creating comments
-router.post('/:postId/comments', (req, res) => {
+router.post('/:postId/comments', authenticateToken, (req, res) => {
     
+})
+
+// BUG kinda: anyone can delete post as long as they have both userId and postId, BUT the onyl 
+// userId available to the user should be their own userId so ???
+router.delete('/del/:userId/:postId', authenticateToken, async (req, res) => {
+    const userId = req.params.userId
+    const postId = req.params.postId
+
+    // check if userId of postId belongs to given userId from param
+    // try {
+    //     const response = await delPost(userId, postId);
+    //     res.status(200);
+    // } catch (err) {
+    //     console.error("error: ", err.name);
+    //     res.status(400);
+    // }
+
+    const status = await delPost(userId, postId);
+    if (status == 200) {
+        res.status(200).json({success: "Successfully deleted post"});
+    } else {
+        res.status(400).json({error: "Error deleting post"});
+    }
 })
 
 module.exports = router;

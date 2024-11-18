@@ -244,6 +244,27 @@ const getUserPosts = async (userId) => {
     return response.Items
 }
 
+const delPost = async (userId, postId) => {
+    const command = new DeleteCommand({
+        TableName: "Posts",
+        Key: {
+            userId: userId,     // partition key
+            postId: postId,     // sort key
+        },
+        ConditionExpression: "attribute_exists(userId) AND attribute_exists(postId)",   // only deletes if post attributes exist
+        ReturnValues: "ALL_OLD"     // should return deleted post
+    });
+
+    try {
+        const response = await docClient.send(command);
+        console.log("Post deleted successfully.");
+        return getStatusCode(response);
+    } catch (error) {
+        console.log("Error: ", error.name);
+        return getStatusCode(error)
+    }
+}
+
 const saveMessage = async (message) => {
     const command = new PutCommand({
         TableName: "Messages",
@@ -471,8 +492,14 @@ const updateUser = async(userId, bio, name, pfp = "DNE", banner = "DNE") => {
     }
 }
 
+// HELPER FUNCTION TO GET HTTP STATUS CODE FROM RESPONSE
+// ONLY USE IF YOU KNOW WHAT RESPONSE LOOKS LIKE, otherwise it may break something
+function getStatusCode(response) {
+    return response['$metadata'].httpStatusCode
+}
+
 module.exports = { addUser, readUsers, createPost, readPosts, readLikes, 
     readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken,
     getUserPosts, saveMessage, getMessageHistory, updateFollowing, updateFollowers,
-    updateUser, validUsername
+    updateUser, validUsername, delPost
  };
