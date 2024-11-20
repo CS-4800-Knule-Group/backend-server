@@ -118,6 +118,25 @@ const createComment = async(newComment) => {
     return response;
 }
 
+const getComments = async (postId) => {
+    const command = new QueryCommand({
+        TableName: "Comments",
+        KeyConditionExpression: "postId = :postId",
+        ExpressionAttributeValues: {
+            ":postId": { S: postId },
+        }
+    })
+
+    try {
+        const response = await docClient.send(command);
+        console.log(response.Items);
+        return response.Items;
+    } catch (err) {
+        console.log("err: ", err)
+    }
+}
+
+
 const readLikes = async() => {
     const command = new ScanCommand({
         TableName: "Likes",
@@ -501,5 +520,5 @@ function getStatusCode(response) {
 module.exports = { addUser, readUsers, createPost, readPosts, readLikes, 
     readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken,
     getUserPosts, saveMessage, getMessageHistory, updateFollowing, updateFollowers,
-    updateUser, validUsername, delPost
+    updateUser, validUsername, delPost, getComments, createComment
  };

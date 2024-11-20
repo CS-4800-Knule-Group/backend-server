@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const ShortUniqueId = require('short-unique-id');
-const { readComments } = require('../database.js');
+const { readComments, getComments, createComment } = require('../database.js');
+const { authenticateToken } = require('../scripts/middleware.js');
 
 const uid = new ShortUniqueId({ length: 10 });
 
@@ -10,8 +11,15 @@ router.get('/', async (req, res) => {
     res.json(result);
 })
 
+router.get('/post/:postId', async (req, res) => {
+    const postId = req.params.postId;
+    console.log("postId: ", postId)
+    const result = await getComments(postId);
+    res.status(200).json(result);
+})
+
 // route can change
-router.post('/:userId', async (req, res) => {
+router.post('/newComment', authenticateToken, async (req, res) => {
     const { postId, userId, parentCommentId, content } = req.body
     const commentId = uid.rnd();
 

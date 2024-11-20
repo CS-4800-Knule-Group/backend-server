@@ -62,15 +62,6 @@ router.delete('/del/:userId/:postId', authenticateToken, async (req, res) => {
     const userId = req.params.userId
     const postId = req.params.postId
 
-    // check if userId of postId belongs to given userId from param
-    // try {
-    //     const response = await delPost(userId, postId);
-    //     res.status(200);
-    // } catch (err) {
-    //     console.error("error: ", err.name);
-    //     res.status(400);
-    // }
-
     const status = await delPost(userId, postId);
     if (status == 200) {
         res.status(200).json({success: "Successfully deleted post"});
