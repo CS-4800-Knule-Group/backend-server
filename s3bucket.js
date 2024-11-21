@@ -1,4 +1,4 @@
-const {S3Client, PutObjectCommand, GetObjectCommand} = require("@aws-sdk/client-s3");
+const {S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand} = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
 const dotenv = require('dotenv');
 const crypto = require('crypto')
@@ -61,10 +61,21 @@ const getImg = async(imgName) => {
 
 }
 
+const deleteImg = async(imgName) => {
+    const getObjectParams ={
+        Bucket : bucketName,
+        Key : imgName
+    }
+
+    const command = new DeleteObjectCommand(getObjectParams);
+    await s3.send(command);
+    console.log("Deleted " + imgName)
+}
 
 
 
 
 
-module.exports = {createImg, getImg
+
+module.exports = {createImg, getImg, deleteImg
 }

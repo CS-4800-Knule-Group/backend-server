@@ -5,12 +5,14 @@ const ShortUniqueId = require('short-unique-id');
 const { addUser, readUsers, readUser, updateFollowing, updateFollowers, validUsername, updateUser } = require('../database.js');
 const { hashPassword } = require('../scripts/encrypt.js')
 const { authenticateToken, multipartSingle, multipartDouble } = require('../scripts/middleware.js');
-const { createImg, getImg } = require('../s3bucket.js');
+const { createImg, getImg, deleteImg } = require('../s3bucket.js');
+const { read } = require('fs');
 
 const uid = new ShortUniqueId({ length: 8 });
 
 router.get('/', async (req, res) => {
     const result = await readUsers();
+    console.log(result);
     for(const user of result){
         if(user.pfp != undefined && user.pfBanner != undefined){
             user.pfp = await getImg(user.pfp)
@@ -104,20 +106,55 @@ router.put('/updateProfile', multipartDouble(), async(req, res) => {
     const userId = req.body.userId
     const bio = req.body.bio
     const name = req.body.name
+
+    const listUsers = await readUsers();
+    let userPfp = ''
+    let userBanner = '';
+
+    for (const user of listUsers){
+        console.log("Testing user: " + user)
+        if (user.userId == userId){
+            console.log("Testing user.")
+            console.log(user);
+            if(user.pfp != 'default.png'){
+                userPfp = user.pfp;
+            }
+            if(user.banner != 'default-banner.png'){
+                userBanner = user.banner;
+            }
+
+            break;
+        }
+    }
+
     
     try{
         if(req.files.pfp == undefined && req.files.banner == undefined){   
             await updateUser(userId, bio, name)
         } else if (req.files.banner == undefined){
             const pfpName = await createImg(req.files.pfp[0], 150, 150)
+            console.log("Testing result")
+            console.log(userPfp)
+            if(userPfp != ''){
+                deleteImg(userPfp)
+            }
             await updateUser(userId, bio, name, pfpName)
         } else if (req.files.pfp == undefined){
             const bannerName = await createImg(req.files.banner[0], 400, 1875)
+            if(userBanner != ''){
+                deleteImg(userBanner)
+            }
             await updateUser(userId, bio, name, "DNE", bannerName)
         }
         else{
             const pfpName = await createImg(req.files.pfp[0], 150, 150)
             const bannerName = await createImg(req.files.banner[0], 400, 1875)
+            if(userPfp != ''){
+                deleteImg(userPfp)
+            }
+            if(userBanner != ''){
+                deleteImg(userBanner)
+            }
             await updateUser(userId, bio, name, pfpName, bannerName)
         }
     } catch(err){
