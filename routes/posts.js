@@ -7,7 +7,7 @@ const { authenticateToken } = require('../scripts/middleware.js');
 const uid = new ShortUniqueId({ length: 10 });
 
 // needs to get deleted eventually
-router.get('/', authenticateToken, async (req, res) => {
+router.get('/', async (req, res) => {
     const result = await readPosts();
     res.status(200).json(result);
 })
