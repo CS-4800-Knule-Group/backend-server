@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
     res.status(200).json(result);
 })
 
-router.post('/:userId', authenticateToken, async (req, res) => {
+router.post('/:userId', async (req, res) => {
 // router.post('/:userId', async (req, res) => {
     const postId = uid.rnd();
     const userId = req.params.userId;
@@ -34,7 +34,7 @@ router.post('/:userId', authenticateToken, async (req, res) => {
 })
 
 // route to get all posts from a user
-router.get('/:userId', authenticateToken, async (req, res) => {
+router.get('/:userId', async (req, res) => {
 // router.get('/:userId', async (req, res) => {
     const userId = req.params.userId
     const userPosts = await getUserPosts(userId)
@@ -42,13 +42,13 @@ router.get('/:userId', authenticateToken, async (req, res) => {
 })
 
 // could be potential route for creating comments
-router.post('/:postId/comments', authenticateToken, (req, res) => {
+router.post('/:postId/comments', (req, res) => {
     
 })
 
 // BUG kinda: anyone can delete post as long as they have both userId and postId, BUT the onyl 
 // userId available to the user should be their own userId so ???
-router.delete('/del/:userId/:postId', authenticateToken, async (req, res) => {
+router.delete('/del/:userId/:postId', async (req, res) => {
     const userId = req.params.userId
     const postId = req.params.postId
 
