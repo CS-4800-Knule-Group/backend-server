@@ -157,6 +157,8 @@ router.put('/updateProfile', multipartDouble(), async(req, res) => {
             }
             await updateUser(userId, bio, name, pfpName, bannerName)
         }
+
+        res.status(200).send("Sucessful update")
     } catch(err){
         console.log("Update user failed: ", err);
     }
