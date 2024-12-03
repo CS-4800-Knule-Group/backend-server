@@ -20,30 +20,15 @@ router.get('/post/:postId', async (req, res) => {
 
 // route can change
 router.post('/newComment', authenticateToken, async (req, res) => {
-    const { postId, userId, parentCommentId, content } = req.body
+    const { postId, userId, content } = req.body
     const commentId = uid.rnd();
-
-    if (!parentCommentId) {
-        parentCommentId = null
-    }
-
-    const options = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        timeZoneName: 'short'
-    };
 
     const newComment = {
         postId: postId,
         commentId: commentId,
-        parentCommentId: parentCommentId,
         userId: userId,
         content: content,
-        createdAt: new Date().toLocaleString('en-US', options),
+        createdAt: new Date().toISOString(),
     }
 
     const result = await createComment(newComment);

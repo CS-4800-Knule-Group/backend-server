@@ -1,7 +1,7 @@
 const express = require('express');
 const ShortUniqueId = require('short-unique-id');
 const router = express.Router();
-const { createPost, readPosts, getUserPosts, delPost } = require('../database.js');
+const { createPost, readPosts, getUserPosts, delPost, getPost } = require('../database.js');
 const { authenticateToken } = require('../scripts/middleware.js');
 
 const uid = new ShortUniqueId({ length: 10 });
@@ -39,6 +39,16 @@ router.get('/:userId', async (req, res) => {
     const userId = req.params.userId
     const userPosts = await getUserPosts(userId)
     res.status(200).json(userPosts)
+})
+
+router.get('/post/:postId', async (req, res) => {
+    const postId = req.params.postId;
+    try {
+        const post = await getPost(postId);
+        res.status(200).json(post);
+    } catch (err) {
+        console.log('post does not exist')
+    }
 })
 
 // could be potential route for creating comments

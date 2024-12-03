@@ -1,6 +1,7 @@
 const { CreateTableCommand, DynamoDBClient, QueryCommand, GetItemCommand } = require('@aws-sdk/client-dynamodb');
 const { PutCommand, DynamoDBDocumentClient, ScanCommand, DeleteCommand, GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const { unmarshall } = require("@aws-sdk/util-dynamodb"); // Import the utility
+const { error } = require('console');
 const { stat } = require('fs');
 
 const client = new DynamoDBClient({
@@ -78,6 +79,28 @@ const readPosts = async() => {
     return response.Items;
 }
 
+const getPost = async(postId) => {
+    try {
+        const command = new QueryCommand({
+            TableName: "Posts",
+            IndexName: "postId-index",
+            KeyConditionExpression: "postId = :postId",
+            ExpressionAttributeValues: {
+                ':postId': { S: postId},
+            }
+        });
+    
+        const response = await docClient.send(command);
+        if (response.Items.length == 1) {
+            return unmarshall(response.Items[0]);
+        } else {
+            throw new Error('Failed to find post')
+        }
+    } catch (error) {
+        console.error('Error querying for post: ', error);
+    }
+}
+
 const createPost = async(newPost) => {
     const command = new PutCommand({
         TableName: "Posts",
@@ -118,8 +141,8 @@ const getComments = async (postId) => {
 
     try {
         const response = await docClient.send(command);     // UNMARSHALL THIS
-        console.log(response.Items);
-        return response.Items;
+        const comments = response.Items.map(item => unmarshall(item))
+        return comments;
     } catch (err) {
         console.log("err: ", err)
     }
@@ -510,6 +533,6 @@ function getStatusCode(response) {
 
 module.exports = { addUser, readUser, readUsers, createPost, readPosts, readLikes, 
     readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken,
-    getUserPosts, updateFollowing, updateFollowers,
+    getUserPosts, updateFollowing, updateFollowers, getPost,
     updateUser, validUsername, delPost, getComments, createComment
  };
