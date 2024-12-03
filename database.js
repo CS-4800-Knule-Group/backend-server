@@ -1,5 +1,6 @@
 const { CreateTableCommand, DynamoDBClient, QueryCommand, GetItemCommand } = require('@aws-sdk/client-dynamodb');
 const { PutCommand, DynamoDBDocumentClient, ScanCommand, DeleteCommand, GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
+const { unmarshall } = require("@aws-sdk/util-dynamodb"); // Import the utility
 const { stat } = require('fs');
 
 const client = new DynamoDBClient({
@@ -28,7 +29,8 @@ const readUser = async(userId) => {
     });
 
     const response = await client.send(command)
-    return response.Item;
+    const user = unmarshall(response.Item)
+    return user;
 }
 
 const validUsername = async (username) => {
@@ -76,19 +78,6 @@ const readPosts = async() => {
     return response.Items;
 }
 
-const readPostsBy = async(userId) => {
-    const command = new ScanCommand({
-        TableName: "Posts",
-        FilterExpression: "userId = :userId",
-        ExpressionAttributeValues: {
-            ":userId": { S: userId}
-        }
-    })
-
-    const response = await client.send(command)
-    return response.Items;
-}
-
 const createPost = async(newPost) => {
     const command = new PutCommand({
         TableName: "Posts",
@@ -128,7 +117,7 @@ const getComments = async (postId) => {
     })
 
     try {
-        const response = await docClient.send(command);
+        const response = await docClient.send(command);     // UNMARSHALL THIS
         console.log(response.Items);
         return response.Items;
     } catch (err) {
@@ -256,11 +245,13 @@ const getUserPosts = async (userId) => {
         ExpressionAttributeValues: {
             ":userId": { S: userId }
         },
-        ProjectionExpression: "postId"
     })
 
     const response = await client.send(command)
-    return response.Items
+
+    // Convert each item in response.Items to a plain object
+    const posts = response.Items.map(item => unmarshall(item));
+    return posts
 }
 
 const delPost = async (userId, postId) => {
@@ -294,24 +285,24 @@ const saveMessage = async (message) => {
     return response
 }
 
-const getMessageHistory = async (conversationId) => {
-    const command = new QueryCommand({
-        TableName: "Messages",
-        KeyConditionExpression: "conversationId = :conversationId",
-        ExpressionAttributeValues: {
-            ":conversationId": { S: conversationId }
-        },
-        ScanIndexForward: true
-    })
+// const getMessageHistory = async (conversationId) => {
+//     const command = new QueryCommand({
+//         TableName: "Messages",
+//         KeyConditionExpression: "conversationId = :conversationId",
+//         ExpressionAttributeValues: {
+//             ":conversationId": { S: conversationId }
+//         },
+//         ScanIndexForward: true
+//     })
 
-    const response = await client.send(command)
-    if (response.Items.length > 0) {
-        return response.Items
-    } else {
-        console.error('Error fetching message history', err);
-        return []
-    }
-}
+//     const response = await client.send(command)
+//     if (response.Items.length > 0) {
+//         return response.Items
+//     } else {
+//         console.error('Error fetching message history', err);
+//         return []
+//     }
+// }
 
 const updateFollowing = async (userId, targetId) =>{
     const commandGet = new QueryCommand({
@@ -517,7 +508,7 @@ function getStatusCode(response) {
     return response['$metadata'].httpStatusCode
 }
 
-module.exports = { addUser, readUsers, createPost, readPosts, readLikes, 
+module.exports = { addUser, readUser, readUsers, createPost, readPosts, readLikes, 
     readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken,
     getUserPosts, saveMessage, getMessageHistory, updateFollowing, updateFollowers,
     updateUser, validUsername, delPost, getComments, createComment
