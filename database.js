@@ -195,7 +195,9 @@ const deleteComment = async(postId, commentId) => {
 
     try {
         const result = await docClient.send(command);
-        console.log(result);
+        const statusCode = getStatusCode(result);
+        console.log(statusCode)
+        return statusCode;
     } catch (error) {
         console.log(err)
     }

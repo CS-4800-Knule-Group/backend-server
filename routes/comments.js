@@ -50,7 +50,7 @@ router.delete('/:postId/:commentId', async(req, res) => {
     const commentId = req.params.commentId
 
     const response = await deleteComment(postId, commentId)
-    console.log(response);
+    res.status(response);
 })
 
 module.exports = router;
