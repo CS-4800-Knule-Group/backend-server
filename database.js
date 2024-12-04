@@ -148,6 +148,35 @@ const getComments = async (postId) => {
     }
 }
 
+const addToPost = async(userId, postId, commentId) => {
+    const command = new UpdateCommand({
+        TableName: "Posts",
+        Key: {
+            userId: userId,
+            postId: postId
+        },
+        UpdateExpression: 'SET #comments = list_append(#comments, :commentId)',
+        ExpressionAttributeNames: {
+            "#comments": "comments"
+        },
+        ExpressionAttributeValues: {
+            ':commentId': [{ S: commentId }]
+        },
+        ReturnValues: 'UPDATED_NEW'
+    })
+
+    try {
+        const result = await docClient.send(command)
+        const statusCode = getStatusCode(result)
+        return statusCode
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+const removeComment = async(userId, postId, commentId) => {
+
+}
 
 const readLikes = async() => {
     const command = new ScanCommand({
@@ -533,6 +562,6 @@ function getStatusCode(response) {
 
 module.exports = { addUser, readUser, readUsers, createPost, readPosts, readLikes, 
     readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken,
-    getUserPosts, updateFollowing, updateFollowers, getPost,
+    getUserPosts, updateFollowing, updateFollowers, getPost, addToPost,
     updateUser, validUsername, delPost, getComments, createComment
  };
