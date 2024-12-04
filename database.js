@@ -562,6 +562,6 @@ function getStatusCode(response) {
 
 module.exports = { addUser, readUser, readUsers, createPost, readPosts, readLikes, 
     readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken,
-    getUserPosts, updateFollowing, updateFollowers, getPost, addToPost,
+    getUserPosts, updateFollowing, updateFollowers, getPost, addToPost, createLike,
     updateUser, validUsername, delPost, getComments, createComment
  };
