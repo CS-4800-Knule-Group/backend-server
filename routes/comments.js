@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const ShortUniqueId = require('short-unique-id');
-const { readComments, getComments, createComment, getPost, addToPost } = require('../database.js');
+const { readComments, getComments, createComment, getPost, addToPost, deleteComment } = require('../database.js');
 const { authenticateToken } = require('../scripts/middleware.js');
 
 const uid = new ShortUniqueId({ length: 10 });
@@ -41,7 +41,16 @@ router.post('/newComment', async (req, res) => {
         console.log('Successfulyl created comment: ', {result});
     }
 
-    res.redirect(`/post/${postId}`)
+    // res.redirect(`/post/${postId}`)
+    res.status(response).json(result);
 });
+
+router.delete('/:postId/:commentId', async(req, res) => {
+    const postId = req.params.postId
+    const commentId = req.params.commentId
+
+    const response = await deleteComment(postId, commentId)
+    console.log(response);
+})
 
 module.exports = router;

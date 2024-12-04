@@ -121,13 +121,23 @@ const readComments = async() => {
 }
 
 const createComment = async(newComment) => {
-    const command = new PutCommand({
+    const putCommand = new PutCommand({
         TableName: "Comments",
         Item: newComment,
     })
 
-    const response = await docClient.send(command);
-    return response;
+    await docClient.send(putCommand);
+
+    const getCommand = new GetCommand({
+        TableName: "Comments",
+        Key: {
+            postId: newComment.postId,
+            commentId: newComment.commentId
+        }
+    })
+
+    const response = await docClient.send(getCommand);
+    return response.Item;
 }
 
 const getComments = async (postId) => {
@@ -174,8 +184,21 @@ const addToPost = async(userId, postId, commentId) => {
     }
 }
 
-const removeComment = async(userId, postId, commentId) => {
+const deleteComment = async(postId, commentId) => {
+    const command = new DeleteCommand({
+        TableName: "Comments",
+        Key: {
+            postId: postId,
+            commentId: commentId
+        }
+    })
 
+    try {
+        const result = await docClient.send(command);
+        console.log(result);
+    } catch (error) {
+        console.log(err)
+    }
 }
 
 const readLikes = async() => {
@@ -563,5 +586,5 @@ function getStatusCode(response) {
 module.exports = { addUser, readUser, readUsers, createPost, readPosts, readLikes, 
     readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken,
     getUserPosts, updateFollowing, updateFollowers, getPost, addToPost, createLike,
-    updateUser, validUsername, delPost, getComments, createComment
+    updateUser, validUsername, delPost, getComments, createComment, deleteComment
  };
