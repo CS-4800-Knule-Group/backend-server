@@ -184,6 +184,42 @@ const addToPost = async(userId, postId, commentId) => {
     }
 }
 
+const deleteFromPost = async(userId, postId, commentId) => {
+    const getCommand = new GetCommand({
+        TableName: "Posts",
+        Key: {
+            userId: userId,
+            postId: postId
+        }
+    })
+
+    const result = await docClient.send(getCommand);
+    const currentComments = result.Item ? result.Item.comments : [];
+
+    // filter commentId out
+    const updatedComments = currentComments.filter(comment => comment.S != commentId);
+
+    const updateCommand = new UpdateCommand({
+        TableName: "Posts",
+        Key: {
+            userId: userId,
+            postId: postId
+        },
+        UpdateExpression: 'SET #comments = :updatedComments',
+        ExpressionAttributeNames: {
+            "#comments": "comments"
+        },
+        ExpressionAttributeValues: {
+            ':updatedComments': updatedComments
+        },
+        ReturnValues: 'UPDATED_NEW'
+    })
+
+    const updatedResult = await docClient.send(updateCommand);
+    const statusCode = getStatusCode(updatedResult)
+    return statusCode;
+}
+
 const deleteComment = async(postId, commentId) => {
     const command = new DeleteCommand({
         TableName: "Comments",
@@ -196,7 +232,6 @@ const deleteComment = async(postId, commentId) => {
     try {
         const result = await docClient.send(command);
         const statusCode = getStatusCode(result);
-        console.log(statusCode)
         return statusCode;
     } catch (error) {
         console.log(err)
@@ -588,5 +623,5 @@ function getStatusCode(response) {
 module.exports = { addUser, readUser, readUsers, createPost, readPosts, readLikes, 
     readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken,
     getUserPosts, updateFollowing, updateFollowers, getPost, addToPost, createLike,
-    updateUser, validUsername, delPost, getComments, createComment, deleteComment
+    updateUser, validUsername, delPost, getComments, createComment, deleteComment, deleteFromPost
  };

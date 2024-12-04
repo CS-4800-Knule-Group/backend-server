@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const ShortUniqueId = require('short-unique-id');
-const { readComments, getComments, createComment, getPost, addToPost, deleteComment } = require('../database.js');
+const { readComments, getComments, createComment, getPost, addToPost, deleteComment, deleteFromPost } = require('../database.js');
 const { authenticateToken } = require('../scripts/middleware.js');
 
 const uid = new ShortUniqueId({ length: 10 });
@@ -50,6 +50,10 @@ router.delete('/:postId/:commentId', async(req, res) => {
     const commentId = req.params.commentId
 
     const response = await deleteComment(postId, commentId)
+    const post = await getPost(postId);
+    const postUserId = post.userId;
+    const result = await deleteFromPost(postUserId, postId, commentId)
+    console.log(response)
     res.status(response);
 })
 
