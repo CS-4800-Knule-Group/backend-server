@@ -30,6 +30,17 @@ router.get('/', async (req, res) => {
 router.get('/:userId', async (req, res) => {
     const userId = req.params.userId;
     const result = await readUser(userId);
+    for(const user of result){
+        if(user.pfp != undefined && user.pfBanner != undefined){
+            user.pfp = await getImg(user.pfp)
+            user.pfBanner = await getImg(user.pfBanner)
+        }else if (user.pfp != undefined && user.pfBanner == undefined){
+            console.log(user.pfp)
+            user.pfp = await getImg(user.pfp)
+        } else if(user.pfp == undefined && user.pfBanner != undefined){
+            user.pfBanner = await getImg(user.pfBanner)
+        }
+    }
 
     if (!result) {
         return res.status(404).json({message: "User not found"});
