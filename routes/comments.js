@@ -19,7 +19,7 @@ router.get('/post/:postId', async (req, res) => {
 })
 
 // route can change
-router.post('/newComment', authenticateToken, async (req, res) => {
+router.post('/newComment', async (req, res) => {
     const { postId, userId, content } = req.body
     const commentId = uid.rnd();
 
@@ -34,7 +34,7 @@ router.post('/newComment', authenticateToken, async (req, res) => {
     const result = await createComment(newComment);
     console.log('Successfulyl created comment: ', {result});
 
-    res.redirect('/')
+    res.redirect(`/post/${postId}`)
 });
 
 module.exports = router;
