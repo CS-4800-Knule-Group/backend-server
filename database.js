@@ -158,6 +158,68 @@ const getComments = async (postId) => {
     }
 }
 
+const addLikeToPost = async(userId, postId, likerId) => {
+    const command = new UpdateCommand({
+        TableName: "Posts",
+        Key: {
+            userId: userId,
+            postId: postId
+        },
+        UpdateExpression: 'SET #likes = list_append(#likes, :likerId)',
+        ExpressionAttributeNames: {
+            "#likes": "likes"
+        },
+        ExpressionAttributeValues: {
+            ':likerId': [{ S: likerId }]
+        },
+        ReturnValues: 'UPDATED_NEW'
+    })
+
+    try {
+        const result = await docClient.send(command)
+        const statusCode = getStatusCode(result)
+        return statusCode
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+const deleteLikeFromPost = async(userId, postId, likerId) => {
+    const getCommand = new GetCommand({
+        TableName: "Posts",
+        Key: {
+            userId: userId,
+            postId: postId
+        }
+    })
+
+    const result = await docClient.send(getCommand);
+    const currentLikes = result.Item ? result.Item.likes : [];
+
+    // filter likerId out
+    const updatedLikes = currentLikes.filter(like => like.S != likerId);
+
+    const updateCommand = new UpdateCommand({
+        TableName: "Posts",
+        Key: {
+            userId: userId,
+            postId: postId
+        },
+        UpdateExpression: 'SET #likes = :updatedLikes',
+        ExpressionAttributeNames: {
+            "#likes": "likes"
+        },
+        ExpressionAttributeValues: {
+            ':updatedLikes': updatedLikes
+        },
+        ReturnValues: 'UPDATED_NEW'
+    })
+
+    const updatedResult = await docClient.send(updateCommand);
+    const statusCode = getStatusCode(updatedResult)
+    return statusCode;
+}
+
 const addToPost = async(userId, postId, commentId) => {
     const command = new UpdateCommand({
         TableName: "Posts",
@@ -226,6 +288,24 @@ const deleteComment = async(postId, commentId) => {
         Key: {
             postId: postId,
             commentId: commentId
+        }
+    })
+
+    try {
+        const result = await docClient.send(command);
+        const statusCode = getStatusCode(result);
+        return statusCode;
+    } catch (error) {
+        console.log(err)
+    }
+}
+
+const deleteLike = async(postId, likerId) => {
+    const command = new DeleteCommand({
+        TableName: "Likes",
+        Key: {
+            targetId: postId,
+            userId: likerId
         }
     })
 
@@ -623,5 +703,6 @@ function getStatusCode(response) {
 module.exports = { addUser, readUser, readUsers, createPost, readPosts, readLikes, 
     readComments, getUserPass, getUserId, addRtoken, getRtoken, deleteRtoken,
     getUserPosts, updateFollowing, updateFollowers, getPost, addToPost, createLike,
-    updateUser, validUsername, delPost, getComments, createComment, deleteComment, deleteFromPost
+    updateUser, validUsername, delPost, getComments, createComment, deleteComment, deleteFromPost,
+    addLikeToPost, deleteLikeFromPost, deleteLike
  };
