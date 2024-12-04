@@ -29,7 +29,9 @@ router.get('/', async (req, res) => {
 
 router.get('/:userId', async (req, res) => {
     const userId = req.params.userId;
-    const result = await readUser(userId);      // result == user
+    let result = await readUser(userId);      // result == user
+    result.pfp = await getImg(user.pfp)
+    result.pfBanner = await getImg(user.pfBanner)
 
     if (!result) {
         return res.status(404).json({message: "User not found"});
