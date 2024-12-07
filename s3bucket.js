@@ -49,6 +49,35 @@ const createImg = async(imgData, height, width) => {
     }
 }
 
+const createImgOriginal = async(imgData) => {
+
+    const imgName = randomImgName();
+    let fileBuffer;
+    if(imgData.mimetype == 'image/gif'){
+        fileBuffer = await sharp(imgData.buffer, {animated:true})
+            .toBuffer()
+    } else{
+        fileBuffer = await sharp(imgData.buffer)
+            .toBuffer()
+    }
+
+    params = {
+        Bucket: bucketName,
+        Key: imgName,
+        Body: fileBuffer,
+        ContentType: imgData.mimetype
+    }
+
+    const command = new PutObjectCommand(params)
+
+    try{
+        await s3.send(command)
+        return imgName;
+    } catch(err){
+        console.log("Failed to upload to s3 bucket.")
+    }
+}
+
 const getImg = async(imgName) => {
     const getobjectParams = {
         Bucket : bucketName,
@@ -77,5 +106,5 @@ const deleteImg = async(imgName) => {
 
 
 
-module.exports = {createImg, getImg, deleteImg
+module.exports = {createImg, getImg, deleteImg, createImgOriginal
 }
