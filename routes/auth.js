@@ -27,7 +27,7 @@ router.post('/login', async (req, res) => {
         await addRtoken(rToken)
         res.json({ accessToken: accessToken })
     } else {
-        res.send("failed to login")
+        res.sendStatus(400);
     }
 })
 
