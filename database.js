@@ -477,25 +477,6 @@ const saveMessage = async (message) => {
     return response
 }
 
-// const getMessageHistory = async (conversationId) => {
-//     const command = new QueryCommand({
-//         TableName: "Messages",
-//         KeyConditionExpression: "conversationId = :conversationId",
-//         ExpressionAttributeValues: {
-//             ":conversationId": { S: conversationId }
-//         },
-//         ScanIndexForward: true
-//     })
-
-//     const response = await client.send(command)
-//     if (response.Items.length > 0) {
-//         return response.Items
-//     } else {
-//         console.error('Error fetching message history', err);
-//         return []
-//     }
-// }
-
 const updateFollowing = async (userId, targetId) =>{
     const commandGet = new QueryCommand({
         TableName: "Users",

@@ -85,11 +85,6 @@ router.get('/post/:postId', async (req, res) => {
     }
 })
 
-// could be potential route for creating comments
-router.post('/:postId/comments', (req, res) => {
-    
-})
-
 // BUG kinda: anyone can delete post as long as they have both userId and postId, BUT the onyl 
 // userId available to the user should be their own userId so ???
 router.delete('/del/:userId/:postId', async (req, res) => {

@@ -17,7 +17,6 @@ router.post('/login', async (req, res) => {
         const user = { userId: await getUserId(username), username: username }
         const accessToken = generateAccessToken(user)
         const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET)
-        // TODO: Check if this adds two refresh tokens if a user logs in twice
         // store refreshToken in database
         const encrypedToken = encryptToken(refreshToken)
         const rToken = {

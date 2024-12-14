@@ -8,12 +8,6 @@ jest.mock('../database', () => ({
 }));
 const { readPosts, createPost, getUserPosts } = require('../database');
 
-// jest.mock('../scripts/middleware', () => ({
-//     authenticateToken: jest.fn((req, res, next) => next()),
-//     // multipartDouble: jest.fn((req, res, next) => next()), 
-// }));
-// const { authenticateToken, multipartDouble } = require('../scripts/middleware');
-
 describe("GET /posts", () => {
     beforeAll(() => {
         readPosts.mockResolvedValue([
